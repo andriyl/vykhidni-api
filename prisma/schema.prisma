@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SiteConfig {
+  id          Int     @id @default(autoincrement())
+  name        String
+  startUrl    String
+  actions     Json
+  createdAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
+  updatedAt   DateTime @updatedAt
+  events      Event[]
+}
+
+model Event {
+  id           Int       @id @default(autoincrement())
+  title        String
+  date         String?
+  time         String?
+  location     String?
+  description  String?
+  image        String?
+  unixTime     Int?
+  coordinates  String?
+  url          String    @unique
+  status       String    @default("DRAFT")
+  createdAt    DateTime  @default(now())
+  siteConfigId Int
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id])
+  category     String?
+  isForKids    Boolean?
+  aiProcessed  Boolean   @default(false)
+}
+
+enum EventStatus {
+  DRAFT
+  APPROVED
+  APPROVED_BY_AI
+  REJECTED
+}

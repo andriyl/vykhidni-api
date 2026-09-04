@@ -1,0 +1,9 @@
+{
+	"id": "PQKj5L49W1XE2xE",
+	"json": "{\"id\":\"PQKj5L49W1XE2xE\",\"url\":\"https://victoriagardens.com.ua/news/202510/7781\",\"loadedUrl\":\"https://victoriagardens.com.ua/news/202510/7781\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202510/7781\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":1,\"errorMessages\":[\"locator.innerText: Error: strict mode violation: locator('div.field-items') resolved to 2 elements:\\n    1) <div class=\\\"field-items\\\">…</div> aka locator('.field-items').first()\\n    2) <div class=\\\"field-items\\\">…</div> aka locator('#node-7781 div').filter({ hasText: 'Субота, 25 жовтня, 15:00' }).nth(2)\\n\\nCall log:\\n\\u001b[2m  - waiting for locator('div.field-items')\\u001b[22m\\n\\n    at PlaywrightCrawler.requestHandler (/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:76:48)\\n    at async wrap (/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/node_modules/@apify/timeout/cjs/index.cjs:54:21)\"],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":5}}}",
+	"method": "GET",
+	"orderNo": 1762526267216,
+	"retryCount": 1,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202510/7781",
+	"url": "https://victoriagardens.com.ua/news/202510/7781"
+}

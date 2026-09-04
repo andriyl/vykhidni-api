@@ -1,0 +1,9 @@
+{
+	"id": "L6BKQ5bKjE5LApv",
+	"json": "{\"id\":\"L6BKQ5bKjE5LApv\",\"url\":\"https://victoriagardens.com.ua/news/202509/sezon-7684\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/sezon-7684\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245052,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/sezon-7684",
+	"url": "https://victoriagardens.com.ua/news/202509/sezon-7684"
+}

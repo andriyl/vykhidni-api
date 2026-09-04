@@ -1,0 +1,9 @@
+{
+	"id": "lQN4ufWYTQRHkxX",
+	"json": "{\"id\":\"lQN4ufWYTQRHkxX\",\"url\":\"https://victoriagardens.com.ua/news\",\"loadedUrl\":\"https://victoriagardens.com.ua/news\",\"uniqueKey\":\"https://victoriagardens.com.ua/news\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-11-07T14:37:22.527Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news",
+	"url": "https://victoriagardens.com.ua/news"
+}

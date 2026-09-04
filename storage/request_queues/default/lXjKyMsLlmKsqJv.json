@@ -1,0 +1,9 @@
+{
+	"id": "lXjKyMsLlmKsqJv",
+	"json": "{\"id\":\"lXjKyMsLlmKsqJv\",\"url\":\"https://lmb.lviv.ua/events/arhiv-tretogo-tisyacholittya-taras-prohasko\",\"loadedUrl\":\"https://lmb.lviv.ua/events/arhiv-tretogo-tisyacholittya-taras-prohasko\",\"uniqueKey\":\"https://lmb.lviv.ua/events/arhiv-tretogo-tisyacholittya-taras-prohasko\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:45.260Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/arhiv-tretogo-tisyacholittya-taras-prohasko",
+	"url": "https://lmb.lviv.ua/events/arhiv-tretogo-tisyacholittya-taras-prohasko"
+}

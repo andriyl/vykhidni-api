@@ -1,0 +1,9 @@
+{
+	"id": "dyeGd7KNF7vt8z2",
+	"json": "{\"id\":\"dyeGd7KNF7vt8z2\",\"url\":\"https://lmb.lviv.ua/events/prezentaciya-poetichnoyi-zbirki-igorya-bardackogo\",\"loadedUrl\":\"https://lmb.lviv.ua/events/prezentaciya-poetichnoyi-zbirki-igorya-bardackogo\",\"uniqueKey\":\"https://lmb.lviv.ua/events/prezentaciya-poetichnoyi-zbirki-igorya-bardackogo\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:05.984Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/prezentaciya-poetichnoyi-zbirki-igorya-bardackogo",
+	"url": "https://lmb.lviv.ua/events/prezentaciya-poetichnoyi-zbirki-igorya-bardackogo"
+}

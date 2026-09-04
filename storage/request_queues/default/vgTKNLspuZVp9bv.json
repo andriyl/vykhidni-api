@@ -1,0 +1,9 @@
+{
+	"id": "vgTKNLspuZVp9bv",
+	"json": "{\"id\":\"vgTKNLspuZVp9bv\",\"url\":\"https://victoriagardens.com.ua/news/202508/sova-7628\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/sova-7628\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526246351,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/sova-7628",
+	"url": "https://victoriagardens.com.ua/news/202508/sova-7628"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "Siin3Coa0T9cugF",
+	"json": "{\"id\":\"Siin3Coa0T9cugF\",\"url\":\"https://lmb.lviv.ua/events/zustrich-iz-vasilem-vasilcivim\",\"loadedUrl\":\"https://lmb.lviv.ua/events/zustrich-iz-vasilem-vasilcivim\",\"uniqueKey\":\"https://lmb.lviv.ua/events/zustrich-iz-vasilem-vasilcivim\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:09.266Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/zustrich-iz-vasilem-vasilcivim",
+	"url": "https://lmb.lviv.ua/events/zustrich-iz-vasilem-vasilcivim"
+}

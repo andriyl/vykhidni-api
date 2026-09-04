@@ -1,0 +1,9 @@
+{
+	"id": "rgKgyteNkXvqTwn",
+	"json": "{\"id\":\"rgKgyteNkXvqTwn\",\"url\":\"https://lmb.lviv.ua/events?page=10\",\"loadedUrl\":\"https://lmb.lviv.ua/events?page=10\",\"uniqueKey\":\"https://lmb.lviv.ua/events?page=10\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"PAGINATION\",\"__crawlee\":{\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:15.904Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events?page=10",
+	"url": "https://lmb.lviv.ua/events?page=10"
+}

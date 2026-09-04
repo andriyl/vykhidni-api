@@ -1,0 +1,9 @@
+{
+	"id": "RAsgntNAmxLo2Dm",
+	"json": "{\"id\":\"RAsgntNAmxLo2Dm\",\"url\":\"https://lmb.lviv.ua/events/pereglyad-dokumentalnoyi-strichki-dvi-nadiyi\",\"loadedUrl\":\"https://lmb.lviv.ua/events/pereglyad-dokumentalnoyi-strichki-dvi-nadiyi\",\"uniqueKey\":\"https://lmb.lviv.ua/events/pereglyad-dokumentalnoyi-strichki-dvi-nadiyi\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:09.549Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/pereglyad-dokumentalnoyi-strichki-dvi-nadiyi",
+	"url": "https://lmb.lviv.ua/events/pereglyad-dokumentalnoyi-strichki-dvi-nadiyi"
+}

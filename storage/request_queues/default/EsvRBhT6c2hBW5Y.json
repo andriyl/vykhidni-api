@@ -1,0 +1,9 @@
+{
+	"id": "EsvRBhT6c2hBW5Y",
+	"json": "{\"id\":\"EsvRBhT6c2hBW5Y\",\"url\":\"https://victoriagardens.com.ua/news/202509/betty-barclay-7707\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/betty-barclay-7707\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245038,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/betty-barclay-7707",
+	"url": "https://victoriagardens.com.ua/news/202509/betty-barclay-7707"
+}

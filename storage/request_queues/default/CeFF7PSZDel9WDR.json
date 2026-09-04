@@ -1,0 +1,9 @@
+{
+	"id": "CeFF7PSZDel9WDR",
+	"json": "{\"id\":\"CeFF7PSZDel9WDR\",\"url\":\"https://victoriagardens.com.ua/news/201610/16-trc-victoria-gardens-vidkriietsya-29-zhovtnya-onovleno\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/201610/16-trc-victoria-gardens-vidkriietsya-29-zhovtnya-onovleno\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526249642,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/201610/16-trc-victoria-gardens-vidkriietsya-29-zhovtnya-onovleno",
+	"url": "https://victoriagardens.com.ua/news/201610/16-trc-victoria-gardens-vidkriietsya-29-zhovtnya-onovleno"
+}

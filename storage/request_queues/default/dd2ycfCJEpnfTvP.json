@@ -1,0 +1,9 @@
+{
+	"id": "dd2ycfCJEpnfTvP",
+	"json": "{\"id\":\"dd2ycfCJEpnfTvP\",\"url\":\"https://victoriagardens.com.ua/news/202510/lush-7763\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202510/lush-7763\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526437286,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202510/lush-7763",
+	"url": "https://victoriagardens.com.ua/news/202510/lush-7763"
+}

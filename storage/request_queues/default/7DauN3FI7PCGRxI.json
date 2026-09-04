@@ -1,0 +1,9 @@
+{
+	"id": "7DauN3FI7PCGRxI",
+	"json": "{\"id\":\"7DauN3FI7PCGRxI\",\"url\":\"https://victoriagardens.com.ua/news/202509/sinsay-7690\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/sinsay-7690\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245046,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/sinsay-7690",
+	"url": "https://victoriagardens.com.ua/news/202509/sinsay-7690"
+}

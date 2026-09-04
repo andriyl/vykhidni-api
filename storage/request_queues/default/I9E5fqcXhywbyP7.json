@@ -1,0 +1,9 @@
+{
+	"id": "I9E5fqcXhywbyP7",
+	"json": "{\"id\":\"I9E5fqcXhywbyP7\",\"url\":\"https://victoriagardens.com.ua/news/202509/giulia-7686\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/giulia-7686\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245048,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/giulia-7686",
+	"url": "https://victoriagardens.com.ua/news/202509/giulia-7686"
+}

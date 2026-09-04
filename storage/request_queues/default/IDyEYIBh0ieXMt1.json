@@ -1,0 +1,9 @@
+{
+	"id": "IDyEYIBh0ieXMt1",
+	"json": "{\"id\":\"IDyEYIBh0ieXMt1\",\"url\":\"https://victoriagardens.com.ua/news/202508/akvarel-7602\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/akvarel-7602\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526246361,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/akvarel-7602",
+	"url": "https://victoriagardens.com.ua/news/202508/akvarel-7602"
+}

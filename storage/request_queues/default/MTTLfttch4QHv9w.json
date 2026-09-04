@@ -1,0 +1,9 @@
+{
+	"id": "MTTLfttch4QHv9w",
+	"json": "{\"id\":\"MTTLfttch4QHv9w\",\"url\":\"https://victoriagardens.com.ua/news/202508/solmar-7596\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/solmar-7596\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526246365,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/solmar-7596",
+	"url": "https://victoriagardens.com.ua/news/202508/solmar-7596"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "mwFSO45etYb4DDs",
+	"json": "{\"id\":\"mwFSO45etYb4DDs\",\"url\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-portretiv-pismennikiv-ta-poetiv-rozstrilyanogo-vidrodzhennya-rozstrilyani\",\"loadedUrl\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-portretiv-pismennikiv-ta-poetiv-rozstrilyanogo-vidrodzhennya-rozstrilyani\",\"uniqueKey\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-portretiv-pismennikiv-ta-poetiv-rozstrilyanogo-vidrodzhennya-rozstrilyani\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:54.580Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/vidkrittya-vistavki-portretiv-pismennikiv-ta-poetiv-rozstrilyanogo-vidrodzhennya-rozstrilyani",
+	"url": "https://lmb.lviv.ua/events/vidkrittya-vistavki-portretiv-pismennikiv-ta-poetiv-rozstrilyanogo-vidrodzhennya-rozstrilyani"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "g8S6X32LdoLbnml",
+	"json": "{\"id\":\"g8S6X32LdoLbnml\",\"url\":\"https://victoriagardens.com.ua/news/202507/sova-7506\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202507/sova-7506\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526247456,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202507/sova-7506",
+	"url": "https://victoriagardens.com.ua/news/202507/sova-7506"
+}

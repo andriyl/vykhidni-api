@@ -1,0 +1,9 @@
+{
+	"id": "gg2pTili6xXi2lk",
+	"json": "{\"id\":\"gg2pTili6xXi2lk\",\"url\":\"https://lmb.lviv.ua/events/lekciya-mariyi-bojko-pro-hudozhnika-yuliana-bucmanyuka\",\"loadedUrl\":\"https://lmb.lviv.ua/events/lekciya-mariyi-bojko-pro-hudozhnika-yuliana-bucmanyuka\",\"uniqueKey\":\"https://lmb.lviv.ua/events/lekciya-mariyi-bojko-pro-hudozhnika-yuliana-bucmanyuka\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:08.804Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/lekciya-mariyi-bojko-pro-hudozhnika-yuliana-bucmanyuka",
+	"url": "https://lmb.lviv.ua/events/lekciya-mariyi-bojko-pro-hudozhnika-yuliana-bucmanyuka"
+}

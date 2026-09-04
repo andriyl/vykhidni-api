@@ -1,0 +1,9 @@
+{
+	"id": "gift5jhceawosBx",
+	"json": "{\"id\":\"gift5jhceawosBx\",\"url\":\"https://lmb.lviv.ua/events/rozmova-peremozhemo-zlo-sho-nese-vijna-tema-pershoyi-svitovoyi-vijni-v-zhinochomu-pismi\",\"loadedUrl\":\"https://lmb.lviv.ua/events/rozmova-peremozhemo-zlo-sho-nese-vijna-tema-pershoyi-svitovoyi-vijni-v-zhinochomu-pismi\",\"uniqueKey\":\"https://lmb.lviv.ua/events/rozmova-peremozhemo-zlo-sho-nese-vijna-tema-pershoyi-svitovoyi-vijni-v-zhinochomu-pismi\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:09.846Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/rozmova-peremozhemo-zlo-sho-nese-vijna-tema-pershoyi-svitovoyi-vijni-v-zhinochomu-pismi",
+	"url": "https://lmb.lviv.ua/events/rozmova-peremozhemo-zlo-sho-nese-vijna-tema-pershoyi-svitovoyi-vijni-v-zhinochomu-pismi"
+}

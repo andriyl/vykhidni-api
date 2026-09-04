@@ -1,0 +1,9 @@
+{
+	"id": "X2bwcNnZNh46GUX",
+	"json": "{\"id\":\"X2bwcNnZNh46GUX\",\"url\":\"https://lmb.lviv.ua/events/komik-bibliotekar-brend-biblioteki-ta-bibliotekarya\",\"loadedUrl\":\"https://lmb.lviv.ua/events/komik-bibliotekar-brend-biblioteki-ta-bibliotekarya\",\"uniqueKey\":\"https://lmb.lviv.ua/events/komik-bibliotekar-brend-biblioteki-ta-bibliotekarya\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:54.030Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/komik-bibliotekar-brend-biblioteki-ta-bibliotekarya",
+	"url": "https://lmb.lviv.ua/events/komik-bibliotekar-brend-biblioteki-ta-bibliotekarya"
+}

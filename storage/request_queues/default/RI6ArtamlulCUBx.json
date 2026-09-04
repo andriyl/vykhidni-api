@@ -1,0 +1,9 @@
+{
+	"id": "RI6ArtamlulCUBx",
+	"json": "{\"id\":\"RI6ArtamlulCUBx\",\"url\":\"https://lmb.lviv.ua/events\",\"loadedUrl\":\"https://lmb.lviv.ua/events\",\"uniqueKey\":\"https://lmb.lviv.ua/events\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"__crawlee\":{\"state\":4}},\"handledAt\":\"2025-11-07T14:34:04.072Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events",
+	"url": "https://lmb.lviv.ua/events"
+}

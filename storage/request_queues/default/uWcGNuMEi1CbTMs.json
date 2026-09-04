@@ -1,0 +1,9 @@
+{
+	"id": "uWcGNuMEi1CbTMs",
+	"json": "{\"id\":\"uWcGNuMEi1CbTMs\",\"url\":\"https://victoriagardens.com.ua/news/202508/puma-7591\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/puma-7591\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526246368,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/puma-7591",
+	"url": "https://victoriagardens.com.ua/news/202508/puma-7591"
+}

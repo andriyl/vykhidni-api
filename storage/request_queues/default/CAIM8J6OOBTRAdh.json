@@ -1,0 +1,9 @@
+{
+	"id": "CAIM8J6OOBTRAdh",
+	"json": "{\"id\":\"CAIM8J6OOBTRAdh\",\"url\":\"https://lmb.lviv.ua/events/onlajn-podiya-kazkoterapiya-istoriyi-yaki-zcilyuyut\",\"loadedUrl\":\"https://lmb.lviv.ua/events/onlajn-podiya-kazkoterapiya-istoriyi-yaki-zcilyuyut\",\"uniqueKey\":\"https://lmb.lviv.ua/events/onlajn-podiya-kazkoterapiya-istoriyi-yaki-zcilyuyut\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:08.826Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/onlajn-podiya-kazkoterapiya-istoriyi-yaki-zcilyuyut",
+	"url": "https://lmb.lviv.ua/events/onlajn-podiya-kazkoterapiya-istoriyi-yaki-zcilyuyut"
+}

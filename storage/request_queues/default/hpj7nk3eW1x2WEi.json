@@ -1,0 +1,9 @@
+{
+	"id": "hpj7nk3eW1x2WEi",
+	"json": "{\"id\":\"hpj7nk3eW1x2WEi\",\"url\":\"https://victoriagardens.com.ua/news/202507/natali-bolgar-7519\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202507/natali-bolgar-7519\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526247450,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202507/natali-bolgar-7519",
+	"url": "https://victoriagardens.com.ua/news/202507/natali-bolgar-7519"
+}
