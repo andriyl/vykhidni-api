@@ -1,14 +1,13 @@
 # vykhidni-api
-## GEMINI_API
 
-перейдіть за посиланням та створіть ключ
-https://aistudio.google.com/u/2/api-keys
+### GEMINI_API
 
-**GOOGLE_MAPS_API_KEY**
+Create a key: https://aistudio.google.com/u/2/api-keys
 
-Увійди в Google Cloud Console за посиланням: https://console.cloud.google.com/￼
+### GOOGLE_MAPS_API_KEY
 
-Створи або вибери проект:  _У верхньому меню натисни “Select a project” → “New Project”_
+Go to Google Cloud Console: https://console.cloud.google.com
 
-Увімкни Maps JavaScript API https://console.cloud.google.com/apis/library та створи ключ
+Greate or choose a project: “Select a project” → “New Project”_
 
+Enable and create a key of Maps JavaScript API: https://console.cloud.google.com/apis/library
