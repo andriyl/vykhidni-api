@@ -1,0 +1,70 @@
+{
+  "requestsFinished": 1,
+  "requestsFailed": 8,
+  "requestsRetries": 8,
+  "requestsFailedPerMinute": 22,
+  "requestsFinishedPerMinute": 3,
+  "requestMinDurationMillis": 3292,
+  "requestMaxDurationMillis": 3292,
+  "requestTotalFailedDurationMillis": 12038,
+  "requestTotalFinishedDurationMillis": 3292,
+  "crawlerStartedAt": "2025-11-07T14:33:41.716Z",
+  "crawlerFinishedAt": "2025-11-07T14:34:03.109Z",
+  "statsPersistedAt": "2025-11-07T14:34:03.109Z",
+  "crawlerRuntimeMillis": 21477,
+  "crawlerLastStartTimestamp": 1762526021632,
+  "requestRetryHistogram": [
+    1,
+    null,
+    null,
+    8
+  ],
+  "statsId": 0,
+  "requestAvgFailedDurationMillis": 1505,
+  "requestAvgFinishedDurationMillis": 3292,
+  "requestTotalDurationMillis": 15330,
+  "requestsTotal": 9,
+  "requestsWithStatusCode": {
+    "200": 33
+  },
+  "errors": {
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:71:45": {
+      "missing error code": {
+        "Error": {
+          "locator.textContent: Error: strict mode violation: locator('.spoiler__head2 > span') resolved to _ elements:": {
+            "count": 7
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
+      "missing error code": {
+        "Error": {
+          "locator.textContent: Error: strict mode violation: locator('.time-link') resolved to 2 elements:": {
+            "count": 1
+          }
+        }
+      }
+    }
+  },
+  "retryErrors": {
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:71:45": {
+      "missing error code": {
+        "Error": {
+          "locator.textContent: Error: strict mode violation: locator('.spoiler__head2 > span') resolved to _ elements:": {
+            "count": 21
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
+      "missing error code": {
+        "Error": {
+          "locator.textContent: Error: strict mode violation: locator('.time-link') resolved to 2 elements:": {
+            "count": 3
+          }
+        }
+      }
+    }
+  }
+}

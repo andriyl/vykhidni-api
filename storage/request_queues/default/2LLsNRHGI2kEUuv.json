@@ -1,0 +1,9 @@
+{
+	"id": "2LLsNRHGI2kEUuv",
+	"json": "{\"id\":\"2LLsNRHGI2kEUuv\",\"url\":\"https://victoriagardens.com.ua/news/202509/mrscrubber-7724\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/mrscrubber-7724\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526244287,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/mrscrubber-7724",
+	"url": "https://victoriagardens.com.ua/news/202509/mrscrubber-7724"
+}

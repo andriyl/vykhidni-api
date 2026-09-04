@@ -1,0 +1,9 @@
+{
+	"id": "nIHPdKpcM2AARv4",
+	"json": "{\"id\":\"nIHPdKpcM2AARv4\",\"url\":\"https://victoriagardens.com.ua/news/202507/puma-7523\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202507/puma-7523\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526247445,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202507/puma-7523",
+	"url": "https://victoriagardens.com.ua/news/202507/puma-7523"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "M35EaovjKU79jTr",
+	"json": "{\"id\":\"M35EaovjKU79jTr\",\"url\":\"https://lmb.lviv.ua/events/literaturni-balachki-v-chitackomu-klubi-zelena-kanapa\",\"loadedUrl\":\"https://lmb.lviv.ua/events/literaturni-balachki-v-chitackomu-klubi-zelena-kanapa\",\"uniqueKey\":\"https://lmb.lviv.ua/events/literaturni-balachki-v-chitackomu-klubi-zelena-kanapa\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:44.867Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/literaturni-balachki-v-chitackomu-klubi-zelena-kanapa",
+	"url": "https://lmb.lviv.ua/events/literaturni-balachki-v-chitackomu-klubi-zelena-kanapa"
+}

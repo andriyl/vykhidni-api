@@ -1,0 +1,9 @@
+{
+	"id": "YGSA3HyXeFAvX8U",
+	"json": "{\"id\":\"YGSA3HyXeFAvX8U\",\"url\":\"https://lmb.lviv.ua/events/majster-klas-garbuz-ikebana\",\"loadedUrl\":\"https://lmb.lviv.ua/events/majster-klas-garbuz-ikebana\",\"uniqueKey\":\"https://lmb.lviv.ua/events/majster-klas-garbuz-ikebana\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:54.755Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/majster-klas-garbuz-ikebana",
+	"url": "https://lmb.lviv.ua/events/majster-klas-garbuz-ikebana"
+}

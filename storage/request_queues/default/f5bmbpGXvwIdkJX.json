@@ -1,0 +1,9 @@
+{
+	"id": "f5bmbpGXvwIdkJX",
+	"json": "{\"id\":\"f5bmbpGXvwIdkJX\",\"url\":\"https://lmb.lviv.ua/events/den-bibliotek\",\"loadedUrl\":\"https://lmb.lviv.ua/events/den-bibliotek\",\"uniqueKey\":\"https://lmb.lviv.ua/events/den-bibliotek\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:54.402Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/den-bibliotek",
+	"url": "https://lmb.lviv.ua/events/den-bibliotek"
+}

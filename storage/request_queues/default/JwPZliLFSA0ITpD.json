@@ -1,0 +1,9 @@
+{
+	"id": "JwPZliLFSA0ITpD",
+	"json": "{\"id\":\"JwPZliLFSA0ITpD\",\"url\":\"https://victoriagardens.com.ua/news/202508/house-7575\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/house-7575\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526248045,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/house-7575",
+	"url": "https://victoriagardens.com.ua/news/202508/house-7575"
+}

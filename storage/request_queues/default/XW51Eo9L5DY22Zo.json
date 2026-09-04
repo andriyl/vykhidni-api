@@ -1,0 +1,9 @@
+{
+	"id": "XW51Eo9L5DY22Zo",
+	"json": "{\"id\":\"XW51Eo9L5DY22Zo\",\"url\":\"https://victoriagardens.com.ua/news/202507/master-zoo-7494\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202507/master-zoo-7494\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526247461,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202507/master-zoo-7494",
+	"url": "https://victoriagardens.com.ua/news/202507/master-zoo-7494"
+}

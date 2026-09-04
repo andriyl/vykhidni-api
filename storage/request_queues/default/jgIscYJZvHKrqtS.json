@@ -1,0 +1,9 @@
+{
+	"id": "jgIscYJZvHKrqtS",
+	"json": "{\"id\":\"jgIscYJZvHKrqtS\",\"url\":\"https://victoriagardens.com.ua/news/201505/1-alfa-jazz-festival\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/201505/1-alfa-jazz-festival\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526249655,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/201505/1-alfa-jazz-festival",
+	"url": "https://victoriagardens.com.ua/news/201505/1-alfa-jazz-festival"
+}

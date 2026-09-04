@@ -1,0 +1,9 @@
+{
+	"id": "OgAaHTy8w6Go6LV",
+	"json": "{\"id\":\"OgAaHTy8w6Go6LV\",\"url\":\"https://victoriagardens.com.ua/news/202509/7661\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/7661\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245632,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/7661",
+	"url": "https://victoriagardens.com.ua/news/202509/7661"
+}

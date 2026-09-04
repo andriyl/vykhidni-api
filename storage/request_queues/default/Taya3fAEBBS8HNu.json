@@ -1,0 +1,9 @@
+{
+	"id": "Taya3fAEBBS8HNu",
+	"json": "{\"id\":\"Taya3fAEBBS8HNu\",\"url\":\"https://lmb.lviv.ua/events?page=21\",\"loadedUrl\":\"https://lmb.lviv.ua/events?page=21\",\"uniqueKey\":\"https://lmb.lviv.ua/events?page=21\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"PAGINATION\",\"__crawlee\":{\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:16.273Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events?page=21",
+	"url": "https://lmb.lviv.ua/events?page=21"
+}

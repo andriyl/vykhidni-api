@@ -1,0 +1,9 @@
+{
+	"id": "HeAavL5Rf31zwHF",
+	"json": "{\"id\":\"HeAavL5Rf31zwHF\",\"url\":\"https://lmb.lviv.ua/events/zibrannya-chitackogo-klubu-u-veresni\",\"loadedUrl\":\"https://lmb.lviv.ua/events/zibrannya-chitackogo-klubu-u-veresni\",\"uniqueKey\":\"https://lmb.lviv.ua/events/zibrannya-chitackogo-klubu-u-veresni\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:09.079Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/zibrannya-chitackogo-klubu-u-veresni",
+	"url": "https://lmb.lviv.ua/events/zibrannya-chitackogo-klubu-u-veresni"
+}

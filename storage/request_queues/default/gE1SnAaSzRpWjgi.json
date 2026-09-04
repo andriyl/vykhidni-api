@@ -1,0 +1,9 @@
+{
+	"id": "gE1SnAaSzRpWjgi",
+	"json": "{\"id\":\"gE1SnAaSzRpWjgi\",\"url\":\"https://lmb.lviv.ua/events/navchannya-vnutrishni-opori-ta-resursna-stijkist\",\"loadedUrl\":\"https://lmb.lviv.ua/events/navchannya-vnutrishni-opori-ta-resursna-stijkist\",\"uniqueKey\":\"https://lmb.lviv.ua/events/navchannya-vnutrishni-opori-ta-resursna-stijkist\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:09.238Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/navchannya-vnutrishni-opori-ta-resursna-stijkist",
+	"url": "https://lmb.lviv.ua/events/navchannya-vnutrishni-opori-ta-resursna-stijkist"
+}

@@ -1,0 +1,9 @@
+{
+	"id": "xTE1nO2TZBVUBL3",
+	"json": "{\"id\":\"xTE1nO2TZBVUBL3\",\"url\":\"https://victoriagardens.com.ua/news/201608/31-zustrichayte-new-yorker-lvovi\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/201608/31-zustrichayte-new-yorker-lvovi\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526249651,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/201608/31-zustrichayte-new-yorker-lvovi",
+	"url": "https://victoriagardens.com.ua/news/201608/31-zustrichayte-new-yorker-lvovi"
+}

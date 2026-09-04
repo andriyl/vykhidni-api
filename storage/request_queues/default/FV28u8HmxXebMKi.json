@@ -1,0 +1,9 @@
+{
+	"id": "FV28u8HmxXebMKi",
+	"json": "{\"id\":\"FV28u8HmxXebMKi\",\"url\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-zagravi-paraski-plitki-goricvit-u-misteckij-biblioteci\",\"loadedUrl\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-zagravi-paraski-plitki-goricvit-u-misteckij-biblioteci\",\"uniqueKey\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-zagravi-paraski-plitki-goricvit-u-misteckij-biblioteci\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:06.966Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/vidkrittya-vistavki-zagravi-paraski-plitki-goricvit-u-misteckij-biblioteci",
+	"url": "https://lmb.lviv.ua/events/vidkrittya-vistavki-zagravi-paraski-plitki-goricvit-u-misteckij-biblioteci"
+}

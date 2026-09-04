@@ -1,0 +1,9 @@
+{
+	"id": "ApdYxDves4ArmYz",
+	"json": "{\"id\":\"ApdYxDves4ArmYz\",\"url\":\"https://lmb.lviv.ua/events/kolorovi-vidlunnya-vistavka-zhivopisu-olega-lozinskogo\",\"loadedUrl\":\"https://lmb.lviv.ua/events/kolorovi-vidlunnya-vistavka-zhivopisu-olega-lozinskogo\",\"uniqueKey\":\"https://lmb.lviv.ua/events/kolorovi-vidlunnya-vistavka-zhivopisu-olega-lozinskogo\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:09.239Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/kolorovi-vidlunnya-vistavka-zhivopisu-olega-lozinskogo",
+	"url": "https://lmb.lviv.ua/events/kolorovi-vidlunnya-vistavka-zhivopisu-olega-lozinskogo"
+}

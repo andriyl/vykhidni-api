@@ -1,0 +1,9 @@
+{
+	"id": "S8DrJ9Ohb083dpA",
+	"json": "{\"id\":\"S8DrJ9Ohb083dpA\",\"url\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-kartin-kozackij-shlyah\",\"loadedUrl\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-kartin-kozackij-shlyah\",\"uniqueKey\":\"https://lmb.lviv.ua/events/vidkrittya-vistavki-kartin-kozackij-shlyah\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:35:08.825Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/vidkrittya-vistavki-kartin-kozackij-shlyah",
+	"url": "https://lmb.lviv.ua/events/vidkrittya-vistavki-kartin-kozackij-shlyah"
+}

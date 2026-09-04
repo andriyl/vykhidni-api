@@ -1,0 +1,9 @@
+{
+	"id": "u7OcARk5r9kt0nS",
+	"json": "{\"id\":\"u7OcARk5r9kt0nS\",\"url\":\"https://victoriagardens.com.ua/news/202511/estro-7861\",\"loadedUrl\":\"https://victoriagardens.com.ua/news/202511/estro-7861\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202511/estro-7861\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":1,\"errorMessages\":[\"locator.textContent: Target page, context or browser has been closed\\nCall log:\\n\\u001b[2m  - waiting for locator('div.field-items p:first-of-type')\\u001b[22m\\n\\n    at PlaywrightCrawler.requestHandler (/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:71:45)\\n    at async wrap (/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/node_modules/@apify/timeout/cjs/index.cjs:54:21)\"],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":5}}}",
+	"method": "GET",
+	"orderNo": 1762526267702,
+	"retryCount": 1,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202511/estro-7861",
+	"url": "https://victoriagardens.com.ua/news/202511/estro-7861"
+}

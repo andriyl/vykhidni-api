@@ -1,0 +1,9 @@
+{
+	"id": "J00KDNYVNOgn49O",
+	"json": "{\"id\":\"J00KDNYVNOgn49O\",\"url\":\"https://victoriagardens.com.ua/news/202508/love-you-7623\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202508/love-you-7623\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526246354,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202508/love-you-7623",
+	"url": "https://victoriagardens.com.ua/news/202508/love-you-7623"
+}

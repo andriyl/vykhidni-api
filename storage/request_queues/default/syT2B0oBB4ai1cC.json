@@ -1,0 +1,9 @@
+{
+	"id": "syT2B0oBB4ai1cC",
+	"json": "{\"id\":\"syT2B0oBB4ai1cC\",\"url\":\"https://victoriagardens.com.ua/news/202506/lesia-7454\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202506/lesia-7454\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526249134,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202506/lesia-7454",
+	"url": "https://victoriagardens.com.ua/news/202506/lesia-7454"
+}

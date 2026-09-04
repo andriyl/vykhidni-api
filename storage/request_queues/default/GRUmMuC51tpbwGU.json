@@ -1,0 +1,9 @@
+{
+	"id": "GRUmMuC51tpbwGU",
+	"json": "{\"id\":\"GRUmMuC51tpbwGU\",\"url\":\"https://victoriagardens.com.ua/news/202509/bra-bra-bra-7652\",\"uniqueKey\":\"https://victoriagardens.com.ua/news/202509/bra-bra-bra-7652\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\"}}}",
+	"method": "GET",
+	"orderNo": 1762526245648,
+	"retryCount": 0,
+	"uniqueKey": "https://victoriagardens.com.ua/news/202509/bra-bra-bra-7652",
+	"url": "https://victoriagardens.com.ua/news/202509/bra-bra-bra-7652"
+}

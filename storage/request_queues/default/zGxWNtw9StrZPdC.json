@@ -1,0 +1,9 @@
+{
+	"id": "zGxWNtw9StrZPdC",
+	"json": "{\"id\":\"zGxWNtw9StrZPdC\",\"url\":\"https://lmb.lviv.ua/events/poglyad-kriz-tishu-vistavka-pejzazhiv-lyubovi-orel\",\"loadedUrl\":\"https://lmb.lviv.ua/events/poglyad-kriz-tishu-vistavka-pejzazhiv-lyubovi-orel\",\"uniqueKey\":\"https://lmb.lviv.ua/events/poglyad-kriz-tishu-vistavka-pejzazhiv-lyubovi-orel\",\"method\":\"GET\",\"noRetry\":false,\"retryCount\":0,\"errorMessages\":[],\"headers\":{},\"userData\":{\"label\":\"DETAIL\",\"__crawlee\":{\"crawlDepth\":1,\"enqueueStrategy\":\"same-hostname\",\"state\":4}},\"handledAt\":\"2025-11-07T14:34:10.256Z\"}",
+	"method": "GET",
+	"orderNo": null,
+	"retryCount": 0,
+	"uniqueKey": "https://lmb.lviv.ua/events/poglyad-kriz-tishu-vistavka-pejzazhiv-lyubovi-orel",
+	"url": "https://lmb.lviv.ua/events/poglyad-kriz-tishu-vistavka-pejzazhiv-lyubovi-orel"
+}

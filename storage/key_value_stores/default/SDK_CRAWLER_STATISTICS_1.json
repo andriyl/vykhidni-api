@@ -1,0 +1,88 @@
+{
+  "requestsFinished": 55,
+  "requestsFailed": 9,
+  "requestsRetries": 9,
+  "requestsFailedPerMinute": 2,
+  "requestsFinishedPerMinute": 17,
+  "requestMinDurationMillis": 170,
+  "requestMaxDurationMillis": 1685,
+  "requestTotalFailedDurationMillis": 274765,
+  "requestTotalFinishedDurationMillis": 28101,
+  "crawlerStartedAt": "2025-11-07T14:34:03.219Z",
+  "crawlerFinishedAt": "2025-11-07T14:37:19.872Z",
+  "statsPersistedAt": "2025-11-07T14:37:19.872Z",
+  "crawlerRuntimeMillis": 196726,
+  "crawlerLastStartTimestamp": 1762526043146,
+  "requestRetryHistogram": [
+    55,
+    null,
+    null,
+    9
+  ],
+  "statsId": 1,
+  "requestAvgFailedDurationMillis": 30529,
+  "requestAvgFinishedDurationMillis": 511,
+  "requestTotalDurationMillis": 302866,
+  "requestsTotal": 64,
+  "requestsWithStatusCode": {
+    "200": 91
+  },
+  "errors": {
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.textContent: Timeout 30000ms exceeded.": {
+            "count": 5
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:70:47": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.textContent: Timeout 30000ms exceeded.": {
+            "count": 2
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:76:48": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.innerText: Timeout 30000ms exceeded.": {
+            "count": 2
+          }
+        }
+      }
+    }
+  },
+  "retryErrors": {
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.textContent: Timeout 30000ms exceeded.": {
+            "count": 15
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:70:47": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.textContent: Timeout 30000ms exceeded.": {
+            "count": 6
+          }
+        }
+      }
+    },
+    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:76:48": {
+      "missing error code": {
+        "TimeoutError": {
+          "locator.innerText: Timeout 30000ms exceeded.": {
+            "count": 6
+          }
+        }
+      }
+    }
+  }
+}
