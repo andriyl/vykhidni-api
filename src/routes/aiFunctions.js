@@ -1,24 +1,22 @@
-import {PrismaClient} from "@prisma/client";
-import {model} from "../gemini.js";
-import {broadcastLog, getCoordinates, toUnix} from "../utils.js";
+import { PrismaClient } from '@prisma/client'
+import { model } from '../gemini.js'
+import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
 
+const prisma = new PrismaClient()
 
-const prisma = new PrismaClient();
-
-export default async function aiFunctionsRoutes(fastify) {
-
-  fastify.post("/validate-by-ai", async (request, reply) => {
-    broadcastLog("🤖 Починаємо валідацію через AI...");
+export default async function aiFunctionsRoutes (fastify) {
+  fastify.post('/validate-by-ai', async (request, reply) => {
+    broadcastLog('🤖 Починаємо валідацію через AI...')
     try {
       const events = await prisma.event.findMany({
-        where: {status: "DRAFT"},
-      });
+        where: { status: 'DRAFT' }
+      })
 
       if (!events.length) {
-        return {message: "Немає подій для валідації"};
+        return { message: 'Немає подій для валідації' }
       }
 
-      const results = [];
+      const results = []
 
       for (const ev of events) {
         try {
@@ -38,67 +36,65 @@ export default async function aiFunctionsRoutes(fastify) {
         ${JSON.stringify(ev, null, 2)}
 
         Відповідай ТІЛЬКИ валідним JSON без коментарів.
-        `;
+        `
 
-          const aiResponse = await model.generateContent(prompt);
-          const text = aiResponse.response.text();
-          const cleaned = text.replace(/```json|```/g, "").trim();
+          const aiResponse = await model.generateContent(prompt)
+          const text = aiResponse.response.text()
+          const cleaned = text.replace(/```json|```/g, '').trim()
 
-          let parsed;
+          let parsed
           try {
-            parsed = JSON.parse(cleaned);
+            parsed = JSON.parse(cleaned)
           } catch {
-            console.warn("⚠️ AI повернув невалідний JSON:", text);
-            continue;
+            console.warn('⚠️ AI повернув невалідний JSON:', text)
+            continue
           }
 
           const dataToUpdate = {
             ...parsed,
-            status: "APPROVED_BY_AI",
-          };
+            status: 'APPROVED_BY_AI'
+          }
 
-          if (ev.status === "DRAFT") {
-            const coords = await getCoordinates(parsed.location);
-            dataToUpdate.unixTime = toUnix(parsed.date, parsed.time) || null;
-            dataToUpdate.coordinates = coords ? `${coords.lat},${coords.lon}` : null;
+          if (ev.status === 'DRAFT') {
+            const coords = await getCoordinates(parsed.location)
+            dataToUpdate.unixTime = toUnix(parsed.date, parsed.time) || null
+            dataToUpdate.coordinates = coords ? `${coords.lat},${coords.lon}` : null
           }
 
           const updated = await prisma.event.update({
-            where: {id: ev.id},
-            data: dataToUpdate,
-          });
+            where: { id: ev.id },
+            data: dataToUpdate
+          })
 
-          console.log(`✅ Оновлено подію: ${updated.title}`);
-          broadcastLog(`✅ Оновлено подію: ${updated.title}`);
-          results.push(updated);
+          console.log(`✅ Оновлено подію: ${updated.title}`)
+          broadcastLog(`✅ Оновлено подію: ${updated.title}`)
+          results.push(updated)
 
-          await new Promise((r) => setTimeout(r, 2000));
+          await new Promise(resolve => setTimeout(resolve, 2000))
         } catch (innerErr) {
-          console.error("❌ Помилка при обробці події:", ev.id, innerErr.message);
-          broadcastLog("❌ Помилка при обробці події:", ev.id, innerErr.message);
+          console.error('❌ Помилка при обробці події:', ev.id, innerErr.message)
+          broadcastLog('❌ Помилка при обробці події:', ev.id, innerErr.message)
 
           try {
             await prisma.event.update({
-              where: {id: ev.id},
-              data: {aiProcessed: false},
-            });
+              where: { id: ev.id },
+              data: { aiProcessed: false }
+            })
           } catch {
           }
 
-          await new Promise((r) => setTimeout(r, 5000));
+          await new Promise(resolve => setTimeout(resolve, 5000))
         }
       }
 
       return {
         message: `Оброблено ${results.length} подій`,
-        updated: results,
-      };
+        updated: results
+      }
     } catch (err) {
-      console.error("🔥 Глобальна помилка:", err);
-      broadcastLog("🔥 Глобальна помилка:", err);
-      reply.status(500).send({error: "Помилка при валідації подій"});
+      console.error('🔥 Глобальна помилка:', err)
+      broadcastLog('🔥 Глобальна помилка:', err)
+      reply.status(500).send({ error: 'Помилка при валідації подій' })
     }
-  });
-
-
+  })
 }
