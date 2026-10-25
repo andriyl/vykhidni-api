@@ -1,13 +1,11 @@
-import { PrismaClient } from '@prisma/client'
 import 'dotenv/config'
 import { getCoordinates, toUnix } from '../utils.js'
-
-const prisma = new PrismaClient()
+import { prisma } from '../db/prisma.js'
 
 // GET /events?_start=0&_end=10
 export default async function eventRoutes (fastify) {
   fastify.get('/events', async (request, reply) => {
-    const { _start, _end, status, siteConfigId } = request.query
+    const { _start, _end, status, siteConfigId, dateFrom, dateTo } = request.query
 
     const where = {}
     if (status) {
@@ -15,6 +13,11 @@ export default async function eventRoutes (fastify) {
       where.status = { in: statuses }
     }
     if (siteConfigId) where.siteConfigId = parseInt(siteConfigId, 10)
+    if (dateFrom || dateTo) {
+      where.unixTime = {}
+      if (dateFrom) where.unixTime.gte = parseInt(dateFrom, 10)
+      if (dateTo) where.unixTime.lte = parseInt(dateTo, 10)
+    }
 
     const usePagination = _start !== undefined && _end !== undefined
 

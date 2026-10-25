@@ -1,17 +1,30 @@
+import 'dotenv/config'
 import Fastify from 'fastify'
 import fastifyCors from '@fastify/cors'
 import fastifyWebsocket from '@fastify/websocket'
-// import cron from 'node-cron'
 import { scanSites } from './scanner/scanner.js'
 import siteConfigRoutes from './routes/sites-config.js'
 import eventRoutes from './routes/events.js'
 import aiFunctionsRoutes from './routes/aiFunctions.js'
-import { addLogClient } from './utils.js'
+import { addLogClient, broadcastLog } from './utils.js'
 
 const fastify = Fastify({ logger: true })
 
+const defaultOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  'http://127.0.0.1:5175'
+]
+
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
+  : defaultOrigins
+
 await fastify.register(fastifyCors, {
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS']
 })
 
@@ -25,15 +38,26 @@ fastify.get('/logs', { websocket: true }, (socket, req) => {
   addLogClient({ socket, req })
 })
 
-fastify.get('/scan', async () => {
-  const total = await scanSites()
-  return { scanned: total }
-})
+async function runScan (reply, request) {
+  try {
+    const siteId = request?.query?.siteId || request?.body?.siteId
+    broadcastLog(
+      siteId ? `🕷️ Запускаємо скан сайту #${siteId}...` : '🕷️ Запускаємо скан сайтів...'
+    )
+    const total = await scanSites({ siteId })
+    broadcastLog(`🎉 Скан завершено. Нових подій: ${total}`)
+    return { scanned: total }
+  } catch (err) {
+    fastify.log.error(err)
+    broadcastLog(`🔥 Помилка скану: ${err.message}`)
+    return reply.code(500).send({ error: err.message })
+  }
+}
 
-// cron.schedule("0 2 * * *", async () => {
-//   fastify.log.info("Running daily scan...");
-//   const total = await scanSites();
-//   fastify.log.info(`Daily scan completed. Scanned ${total} events.`);
-// });
+fastify.get('/scan', async (request, reply) => runScan(reply, request))
+fastify.post('/scan', async (request, reply) => runScan(reply, request))
 
-fastify.listen({ port: 3000 })
+const port = Number(process.env.PORT) || 3000
+const host = process.env.HOST || '127.0.0.1'
+
+fastify.listen({ port, host })

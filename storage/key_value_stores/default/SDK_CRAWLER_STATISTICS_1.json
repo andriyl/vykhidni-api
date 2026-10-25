@@ -1,88 +1,29 @@
 {
-  "requestsFinished": 55,
-  "requestsFailed": 9,
-  "requestsRetries": 9,
-  "requestsFailedPerMinute": 2,
-  "requestsFinishedPerMinute": 17,
-  "requestMinDurationMillis": 170,
-  "requestMaxDurationMillis": 1685,
-  "requestTotalFailedDurationMillis": 274765,
-  "requestTotalFinishedDurationMillis": 28101,
-  "crawlerStartedAt": "2025-11-07T14:34:03.219Z",
-  "crawlerFinishedAt": "2025-11-07T14:37:19.872Z",
-  "statsPersistedAt": "2025-11-07T14:37:19.872Z",
-  "crawlerRuntimeMillis": 196726,
-  "crawlerLastStartTimestamp": 1762526043146,
+  "requestsFinished": 36,
+  "requestsFailed": 0,
+  "requestsRetries": 0,
+  "requestsFailedPerMinute": 0,
+  "requestsFinishedPerMinute": 197,
+  "requestMinDurationMillis": 308,
+  "requestMaxDurationMillis": 2751,
+  "requestTotalFailedDurationMillis": 0,
+  "requestTotalFinishedDurationMillis": 20307,
+  "crawlerStartedAt": "2026-10-15T18:54:32.272Z",
+  "crawlerFinishedAt": "2026-10-15T18:54:43.234Z",
+  "statsPersistedAt": "2026-10-15T18:54:43.234Z",
+  "crawlerRuntimeMillis": 10971,
+  "crawlerLastStartTimestamp": 1792090472263,
   "requestRetryHistogram": [
-    55,
-    null,
-    null,
-    9
+    36
   ],
   "statsId": 1,
-  "requestAvgFailedDurationMillis": 30529,
-  "requestAvgFinishedDurationMillis": 511,
-  "requestTotalDurationMillis": 302866,
-  "requestsTotal": 64,
+  "requestAvgFailedDurationMillis": null,
+  "requestAvgFinishedDurationMillis": 564,
+  "requestTotalDurationMillis": 20307,
+  "requestsTotal": 36,
   "requestsWithStatusCode": {
-    "200": 91
+    "200": 36
   },
-  "errors": {
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.textContent: Timeout 30000ms exceeded.": {
-            "count": 5
-          }
-        }
-      }
-    },
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:70:47": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.textContent: Timeout 30000ms exceeded.": {
-            "count": 2
-          }
-        }
-      }
-    },
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:76:48": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.innerText: Timeout 30000ms exceeded.": {
-            "count": 2
-          }
-        }
-      }
-    }
-  },
-  "retryErrors": {
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:72:45": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.textContent: Timeout 30000ms exceeded.": {
-            "count": 15
-          }
-        }
-      }
-    },
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:70:47": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.textContent: Timeout 30000ms exceeded.": {
-            "count": 6
-          }
-        }
-      }
-    },
-    "/Users/orestmaryniuk/MyWorkSpace/Backend/event-scrapper/src/scanner/scanner.js:76:48": {
-      "missing error code": {
-        "TimeoutError": {
-          "locator.innerText: Timeout 30000ms exceeded.": {
-            "count": 6
-          }
-        }
-      }
-    }
-  }
+  "errors": {},
+  "retryErrors": {}
 }

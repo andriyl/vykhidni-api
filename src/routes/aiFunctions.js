@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client'
 import { model } from '../gemini.js'
 import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
-
-const prisma = new PrismaClient()
+import { prisma } from '../db/prisma.js'
 
 export default async function aiFunctionsRoutes (fastify) {
   fastify.post('/validate-by-ai', async (request, reply) => {
@@ -73,19 +71,21 @@ export default async function aiFunctionsRoutes (fastify) {
           await new Promise(resolve => setTimeout(resolve, 2000))
         } catch (innerErr) {
           console.error('❌ Помилка при обробці події:', ev.id, innerErr.message)
-          broadcastLog('❌ Помилка при обробці події:', ev.id, innerErr.message)
+          broadcastLog(`❌ Помилка при обробці події ${ev.id}: ${innerErr.message}`)
 
           try {
             await prisma.event.update({
               where: { id: ev.id },
               data: { aiProcessed: false }
             })
-          } catch {
-          }
-
+          } catch {}
           await new Promise(resolve => setTimeout(resolve, 5000))
         }
       }
+
+      broadcastLog(
+        `🏁 Валідацію завершено: успішно ${results.length} з ${events.length}`
+      )
 
       return {
         message: `Оброблено ${results.length} подій`,
@@ -93,7 +93,7 @@ export default async function aiFunctionsRoutes (fastify) {
       }
     } catch (err) {
       console.error('🔥 Глобальна помилка:', err)
-      broadcastLog('🔥 Глобальна помилка:', err)
+      broadcastLog(`🔥 Глобальна помилка: ${err.message}`)
       reply.status(500).send({ error: 'Помилка при валідації подій' })
     }
   })
