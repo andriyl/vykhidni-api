@@ -2,6 +2,13 @@ import 'dotenv/config'
 import { getCoordinates, toUnix } from '../utils.js'
 import { prisma } from '../db/prisma.js'
 
+const EVENT_STATUSES = new Set([
+  'DRAFT',
+  'APPROVED',
+  'APPROVED_BY_AI',
+  'REJECTED'
+])
+
 // GET /events?_start=0&_end=10
 export default async function eventRoutes (fastify) {
   fastify.get('/events', async (request, reply) => {
@@ -9,20 +16,49 @@ export default async function eventRoutes (fastify) {
 
     const where = {}
     if (status) {
-      const statuses = status.split(',').map(s => s.trim())
+      const statuses = status.split(',').map(s => s.trim()).filter(Boolean)
       where.status = { in: statuses }
     }
-    if (siteConfigId) where.siteConfigId = parseInt(siteConfigId, 10)
+    if (siteConfigId !== undefined) {
+      const configId = Number.parseInt(siteConfigId, 10)
+      if (!Number.isInteger(configId)) {
+        return reply.code(400).send({ error: 'Invalid siteConfigId' })
+      }
+      where.siteConfigId = configId
+    }
     if (dateFrom || dateTo) {
       where.unixTime = {}
-      if (dateFrom) where.unixTime.gte = parseInt(dateFrom, 10)
-      if (dateTo) where.unixTime.lte = parseInt(dateTo, 10)
+      if (dateFrom) {
+        const from = Number.parseInt(dateFrom, 10)
+        if (!Number.isInteger(from)) {
+          return reply.code(400).send({ error: 'Invalid dateFrom' })
+        }
+        where.unixTime.gte = from
+      }
+      if (dateTo) {
+        const to = Number.parseInt(dateTo, 10)
+        if (!Number.isInteger(to)) {
+          return reply.code(400).send({ error: 'Invalid dateTo' })
+        }
+        where.unixTime.lte = to
+      }
     }
 
     const usePagination = _start !== undefined && _end !== undefined
+    let skip
+    let take
 
-    const skip = usePagination ? parseInt(_start, 10) : undefined
-    const take = usePagination ? parseInt(_end, 10) - parseInt(_start, 10) : undefined
+    if (usePagination) {
+      skip = Number.parseInt(_start, 10)
+      const end = Number.parseInt(_end, 10)
+      if (
+        !Number.isInteger(skip) || skip < 0 ||
+        !Number.isInteger(end) || end < skip
+      ) {
+        return reply.code(400).send({ error: 'Invalid _start/_end' })
+      }
+      take = end - skip
+    }
 
     const [data, total] = await Promise.all([prisma.event.findMany({
       skip,
@@ -45,10 +81,13 @@ export default async function eventRoutes (fastify) {
 
   // GET /events/:id
   fastify.get('/events/:id', async (request, reply) => {
-    const { id } = request.params
+    const eventId = Number.parseInt(request.params.id, 10)
+    if (!Number.isInteger(eventId)) {
+      return reply.code(400).send({ error: 'Invalid event id' })
+    }
 
     const event = await prisma.event.findUnique({
-      where: { id: parseInt(id, 10) },
+      where: { id: eventId },
       include: {
         siteConfig: {
           select: { name: true }
@@ -76,70 +115,168 @@ export default async function eventRoutes (fastify) {
         return reply.code(400).send({ error: 'Missing required fields' })
       }
 
+      const configId = Number(siteConfigId)
+      if (!Number.isInteger(configId)) {
+        return reply.code(400).send({ error: 'Invalid siteConfigId' })
+      }
+
+      const coords = await getCoordinates(location)
       const newEvent = await prisma.event.create({
         data: {
-          title, date, time, location, description, image, url, siteConfigId
+          title,
+          date,
+          time,
+          location,
+          description,
+          image,
+          url,
+          siteConfigId: configId,
+          unixTime: toUnix(date, time) ?? null,
+          coordinates: coords ? `${coords.lat},${coords.lon}` : null
         }
       })
 
       return newEvent
     } catch (err) {
       console.error(err)
+      if (err.code === 'P2002') {
+        return reply.code(409).send({ error: 'Подія з таким url вже існує' })
+      }
+      if (err.code === 'P2003') {
+        return reply.code(400).send({ error: 'siteConfigId не існує' })
+      }
       return reply.code(500).send({ error: 'Server error' })
     }
   })
 
   fastify.patch('/events/:id', async (request, reply) => {
-    const { id } = request.params
-    const {
-      title, date, time, location, description, image, url, status, siteConfigId
-    } = request.body
+    const eventId = Number.parseInt(request.params.id, 10)
+    if (!Number.isInteger(eventId)) {
+      return reply.code(400).send({ error: 'Invalid event id' })
+    }
+
+    const body = request.body || {}
+    const editableFields = [
+      'title', 'date', 'time', 'location', 'description', 'image', 'url',
+      'status', 'siteConfigId'
+    ]
+
+    const dataToUpdate = {}
+    for (const field of editableFields) {
+      if (body[field] !== undefined) dataToUpdate[field] = body[field]
+    }
+
+    for (const field of [
+      'title', 'date', 'time', 'location', 'description', 'image', 'url',
+      'status'
+    ]) {
+      const value = dataToUpdate[field]
+      if (value !== undefined && value !== null && typeof value !== 'string') {
+        return reply.code(400).send({ error: `${field} має бути рядком` })
+      }
+    }
+
+    if (
+      dataToUpdate.title === null ||
+      (dataToUpdate.title !== undefined && !String(dataToUpdate.title).trim())
+    ) {
+      return reply.code(400).send({ error: 'title не може бути порожнім' })
+    }
+    if (
+      dataToUpdate.url === null ||
+      (dataToUpdate.url !== undefined && !String(dataToUpdate.url).trim())
+    ) {
+      return reply.code(400).send({ error: 'url не може бути порожнім' })
+    }
+    if (
+      dataToUpdate.status !== undefined &&
+      !EVENT_STATUSES.has(dataToUpdate.status)
+    ) {
+      return reply.code(400).send({ error: 'Некоректний status' })
+    }
+    if (dataToUpdate.siteConfigId !== undefined) {
+      const configId = Number(dataToUpdate.siteConfigId)
+      if (!Number.isInteger(configId) || configId <= 0) {
+        return reply.code(400).send({ error: 'Invalid siteConfigId' })
+      }
+      dataToUpdate.siteConfigId = configId
+    }
+    if (!Object.keys(dataToUpdate).length) {
+      return reply.code(400).send({ error: 'Немає полів для оновлення' })
+    }
 
     try {
       const existing = await prisma.event.findUnique({
-        where: { id: parseInt(id, 10) }
+        where: { id: eventId }
       })
 
       if (!existing) {
         return reply.code(404).send({ error: 'Event not found' })
       }
 
-      const dataToUpdate = {
-        title, date, time, location, description, image, url, siteConfigId, status
+      const nextDate = dataToUpdate.date !== undefined
+        ? dataToUpdate.date
+        : existing.date
+      const nextTime = dataToUpdate.time !== undefined
+        ? dataToUpdate.time
+        : existing.time
+      const nextLocation = dataToUpdate.location !== undefined
+        ? dataToUpdate.location
+        : existing.location
+      const nextStatus = dataToUpdate.status !== undefined
+        ? dataToUpdate.status
+        : existing.status
+
+      const dateChanged =
+        dataToUpdate.date !== undefined || dataToUpdate.time !== undefined
+      const locationChanged = dataToUpdate.location !== undefined
+      const approvedNow =
+        nextStatus !== existing.status &&
+        (nextStatus === 'APPROVED' || nextStatus === 'APPROVED_BY_AI')
+
+      // unixTime залежить від date/time, тому перераховуємо його при будь-якій
+      // зміні цих полів, а не лише при переході DRAFT → APPROVED.
+      if (dateChanged || (approvedNow && existing.unixTime === null)) {
+        dataToUpdate.unixTime = toUnix(nextDate, nextTime) ?? null
       }
 
-      if (existing.status === 'DRAFT' && status === 'APPROVED') {
-        const coords = await getCoordinates(location)
-        console.log('LOCATION', location)
-        console.log('COORDS', coords)
-
-        dataToUpdate.unixTime = toUnix(date, time) || null
-        dataToUpdate.coordinates = coords ? `${coords.lat},${coords.lon}` : null
+      // Координати перераховуємо лише коли змінилася локація (або при
+      // затвердженні, якщо їх ще немає), щоб не робити зайвих запитів до API.
+      if (locationChanged || (approvedNow && !existing.coordinates)) {
+        const coords = await getCoordinates(nextLocation)
+        dataToUpdate.coordinates = coords
+          ? `${coords.lat},${coords.lon}`
+          : null
       }
-
-      console.log('DATA_TO_UPDATE', dataToUpdate)
 
       const updated = await prisma.event.update({
-        where: { id: parseInt(id, 10) }, data: dataToUpdate
+        where: { id: eventId },
+        data: dataToUpdate
       })
 
-      console.log('UPDATED', updated)
       return updated
     } catch (err) {
       console.error(err)
-      return reply
-        .code(500)
-        .send({ error: 'Event not found or cannot update' })
+      if (err.code === 'P2025') {
+        return reply.code(404).send({ error: 'Event not found' })
+      }
+      if (err.code === 'P2002') {
+        return reply.code(409).send({ error: 'Подія з таким url вже існує' })
+      }
+      return reply.code(500).send({ error: 'Cannot update event' })
     }
   })
 
   // DELETE /events/:id
   fastify.delete('/events/:id', async (request, reply) => {
-    const { id } = request.params
+    const eventId = Number.parseInt(request.params.id, 10)
+    if (!Number.isInteger(eventId)) {
+      return reply.code(400).send({ error: 'Invalid event id' })
+    }
 
     try {
       await prisma.event.delete({
-        where: { id: parseInt(id, 10) }
+        where: { id: eventId }
       })
 
       return { success: true }

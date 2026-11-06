@@ -5,6 +5,13 @@ export default [
 		ts: true
 	}),
 	{
+		// Globals, які використовуються всередині page.evaluate() у Chromium.
+		languageOptions: {
+			globals: {
+				CSS: 'readonly',
+				location: 'readonly'
+			}
+		},
 		rules: {
 			'@stylistic/comma-dangle': ['error', {
 				arrays: 'never',

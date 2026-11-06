@@ -75,24 +75,48 @@ function parseDateParts (dateStr) {
     }
   }
 
+  // "29.10", "29/10" без року. Для афіш це майже завжди поточний рік.
+  match = dateStr.match(/(?:^|[^\d])(\d{1,2})[./-](\d{1,2})(?![\d./-])/)
+  if (match) {
+    const day = +match[1]
+    const month = +match[2]
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return { day, month, year: new Date().getFullYear() }
+    }
+  }
+
   return null
 }
 
-function parseTimeParts (timeStr) {
+function parseTimeParts (timeStr, allowDot = true) {
   if (!timeStr || typeof timeStr !== 'string') return { hours: 0, minutes: 0 }
 
-  const match = timeStr.match(/(\d{1,2})[:.](\d{2})/)
+  const match = allowDot
+    ? timeStr.match(/(\d{1,2})[:.](\d{2})/)
+    : timeStr.match(/(?:^|[T\s])(\d{1,2}):(\d{2})(?::\d{2})?/)
+
   if (!match) return { hours: 0, minutes: 0 }
-  return { hours: +match[1], minutes: +match[2] }
+
+  const hours = +match[1]
+  const minutes = +match[2]
+  if (hours > 23 || minutes > 59) return { hours: 0, minutes: 0 }
+
+  return { hours, minutes }
 }
 
 export function toUnix (dateStr, timeStr) {
   const parts = parseDateParts(dateStr)
   if (!parts) return null
 
-  const { hours, minutes } = parseTimeParts(
-    timeStr && timeStr.trim() ? timeStr : dateStr
-  )
+  // Час беремо з окремого поля. Якщо його немає — з dateStr, але лише
+  // коли там справжній час ("2025-10-29T18:00"), а не "29.10".
+  const hasTimeField = Boolean(timeStr && timeStr.trim())
+  const hasTimeInDate = /\d{1,2}:\d{2}/.test(dateStr)
+  const { hours, minutes } = hasTimeField
+    ? parseTimeParts(timeStr, true)
+    : hasTimeInDate
+      ? parseTimeParts(dateStr, false)
+      : { hours: 0, minutes: 0 }
 
   const jsDate = new Date(
     parts.year,
@@ -101,6 +125,15 @@ export function toUnix (dateStr, timeStr) {
     hours,
     minutes
   )
+
+  // Захист від "31.02", яке JS тихо переносить на березень.
+  if (
+    jsDate.getFullYear() !== parts.year ||
+    jsDate.getMonth() !== parts.month - 1 ||
+    jsDate.getDate() !== parts.day
+  ) {
+    return null
+  }
 
   const ms = jsDate.getTime()
   if (Number.isNaN(ms)) return null
@@ -117,7 +150,7 @@ export async function getCoordinates (address) {
         key: process.env.GOOGLE_MAPS_API_KEY,
         region: 'ua' // Обмежуємо регіон Україною
       },
-      timeout: 1000
+      timeout: 5000
     })
 
     const data = response.data
