@@ -3,7 +3,7 @@
   "retiredSessionsCount": 0,
   "sessions": [
     {
-      "id": "session_fgppMJOaok",
+      "id": "session_ErCPqcszxy",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -16,14 +16,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:15.641Z",
-      "createdAt": "2026-11-06T19:56:15.641Z",
+      "expiresAt": "2026-11-08T20:33:41.093Z",
+      "createdAt": "2026-11-08T19:43:41.093Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_D5hxX5PA5O",
+      "id": "session_TCYDkTACwc",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -33,80 +33,40 @@
         "prefixSecurity": "silent",
         "cookies": [
           {
-            "key": "PHPSESSID",
-            "value": "gphl1tuadm0d2uadtcpq9blhao",
-            "expires": "2026-11-06T20:46:24.661Z",
-            "domain": "lviv.kontramarka.ua",
+            "key": "sid",
+            "value": "7a8b33908e34d4cf548d4c20ce696d5a",
+            "expires": "2026-11-08T20:33:42.328Z",
+            "domain": "moemisto.ua",
             "path": "/",
-            "hostOnly": true,
-            "creation": "2026-11-06T19:56:24.663Z",
-            "lastAccessed": "2026-11-06T19:56:24.663Z"
-          },
-          {
-            "key": "language",
-            "value": "uk",
-            "expires": "2026-12-06T19:56:23.312Z",
-            "domain": "lviv.kontramarka.ua",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-11-06T19:56:24.664Z",
-            "lastAccessed": "2026-11-06T19:56:24.664Z"
-          },
-          {
-            "key": "citySelected",
-            "value": "yes",
-            "expires": "2027-11-06T19:56:23.312Z",
-            "domain": "lviv.kontramarka.ua",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-11-06T19:56:24.664Z",
-            "lastAccessed": "2026-11-06T19:56:24.664Z"
-          },
-          {
-            "key": "_gcl_au",
-            "value": "1.1.521920429.1793994984.48146771.1793994984.1793994984.741598965.1793994984.1793994984",
-            "expires": "2027-02-04T19:56:24.000Z",
-            "domain": "kontramarka.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:24.664Z",
-            "lastAccessed": "2026-11-06T19:56:24.664Z"
-          },
-          {
-            "key": "firstTime_schedule_2019_2",
-            "value": "0",
-            "expires": "2027-11-06T19:56:24.000Z",
-            "domain": "lviv.kontramarka.ua",
-            "path": "/",
-            "hostOnly": true,
-            "creation": "2026-11-06T19:56:24.666Z",
-            "lastAccessed": "2026-11-06T19:56:24.666Z"
-          },
-          {
-            "key": "cf_clearance",
-            "value": "CuCWyTC_p1tOWULvUd4l-HK16CxWXwiL4SHGhpA2mkn6s4WqdMoOWScT4Z6q5TEv_IMvMtyL8yXjAjYI_jDkaF6xqloRr_OppCpTsCoER6tsLKwvCVdAJBQ2v8TnvSPLi7z61eE7YgDfEMjmDXtck_9-Hsho1nEQ4rH6V_ing6I-QGUrYr6F7eXrygEqNslRnUMPfIVwqiGnxJJ9kEVpyCh-F4iqwt2Eh6c75CIxkhV-9GlKW--CJWWVUFFjfllYBV5sCUPc2GLN29njjakaUXaG5NyEOdmTGdby2wrlR8VMeqz-3P7yi4dZiWTzfBdyhybKTUM5_h6obJpJILYYC9DitIX0MKFWoBI0dR7zWRGby68",
-            "expires": "2027-11-06T19:56:24.659Z",
-            "domain": "kontramarka.ua",
-            "path": "/",
-            "secure": true,
             "httpOnly": true,
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:24.666Z",
-            "lastAccessed": "2026-11-06T19:56:24.666Z"
+            "creation": "2026-11-08T19:43:42.330Z",
+            "lastAccessed": "2026-11-08T19:43:42.330Z"
+          },
+          {
+            "key": "device_view",
+            "value": "full",
+            "expires": "2026-12-08T19:43:42.023Z",
+            "domain": "moemisto.ua",
+            "path": "/",
+            "httpOnly": true,
+            "hostOnly": true,
+            "creation": "2026-11-08T19:43:42.330Z",
+            "lastAccessed": "2026-11-08T19:43:42.330Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:15.642Z",
-      "createdAt": "2026-11-06T19:56:15.642Z",
+      "expiresAt": "2026-11-08T20:33:41.094Z",
+      "createdAt": "2026-11-08T19:43:41.094Z",
       "usageCount": 1,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_IhFbluchaE",
+      "id": "session_jn4o005YUz",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -119,14 +79,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:27.842Z",
-      "createdAt": "2026-11-06T19:56:27.842Z",
+      "expiresAt": "2026-11-08T20:35:17.021Z",
+      "createdAt": "2026-11-08T19:45:17.021Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_egcgHoTlLS",
+      "id": "session_iWj2Hnm9lm",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -136,90 +96,90 @@
         "prefixSecurity": "silent",
         "cookies": [
           {
+            "key": "_fbp",
+            "value": "fb.2.1794167125380.323251242519796138",
+            "expires": "2027-02-06T19:45:34.000Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
+          },
+          {
             "key": "cf_clearance",
-            "value": "Cmv3KG1z18nYyw8kZDoOP1LEHDiqeYbkqKDh1biMeLI_Vo6NVMyKo746jJBnMWWPV3jd1jBCBtS3jS2OnuUhSh3xW2LM_VtDOU5lC2tm9r5EC2Kp5N3fU_e1gnq4YBbh8gI3QH2N0APx4U-BjlfIYAlZCa0RhP8G_q6Iz9XqDmUNsVtZ0gpZzxomxuh3efWo8Mu2B_VjTGh3gYbKFqPciLw_hLfS06fE8RiUerZ5_42kp4wF1iGtEpryC7U97SQz-pfMtOvUu_NO0LNX81eQYmbNYS-U_Z8FWka45LGVYd_iki7KwEnRW1xzLNAO7EuOCswaLZmHmy_Q8ULcbD8R-GuIOmVb0q_jKh8gRdtHLptKMDQ",
-            "expires": "2027-11-06T19:56:29.442Z",
+            "value": "CmxOVBMBwVSuonI3h1l5IcWcT6hR3NSPfNfzFKuoXSYprnc1Pu8XNOP73snzg9_ThGrc98JcO_kkSl_e_D3cQtAEm21_uxvmyv_2PvMOhGhJMx1x4pdCO5yjFjhw4vg9N52lDmyXaZUXLsA4LoRhbd_GqyOEo5nHTC1ELETGfaboAV2IuC0yxm1d0WEaLIKA7uLTiYVDfoIXnMnWUxuzbkEjKCyVQcwtEjnxTEpcvl5GllGDNftWjy27Nl20KO7tjWj69jmJI_SO4ixCmZZtYUK55ra1hzS28yZxKvkQitimfvzQS4GsrtknF3ZwGjgbqBttTT6Ykly-IYEwuW3U4uMZWCFNlxY__HjdyAYF11i4koo",
+            "expires": "2027-11-08T19:45:25.395Z",
             "domain": "victoriagardens.com.ua",
             "path": "/",
             "secure": true,
             "httpOnly": true,
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
           },
           {
             "key": "_gcl_au",
-            "value": "1.1.509131812.1793994989",
-            "expires": "2027-02-04T19:56:29.000Z",
+            "value": "1.1.877419566.1794167125",
+            "expires": "2027-02-06T19:45:25.000Z",
             "domain": "victoriagardens.com.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
           },
           {
-            "key": "_fbp",
-            "value": "fb.2.1793994989673.452729376604210650",
-            "expires": "2027-02-04T19:56:33.000Z",
+            "key": "_ga_BR2KQ2WDPJ",
+            "value": "GS2.1.s1794167125$o1$g1$t1794167134$j51$l0$h0",
+            "expires": "2027-12-13T19:45:34.583Z",
             "domain": "victoriagardens.com.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
+          },
+          {
+            "key": "_ga",
+            "value": "GA1.1.1606162835.1794167126",
+            "expires": "2027-12-13T19:45:34.583Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
           },
           {
             "key": "_gid",
-            "value": "GA1.3.1947127016.1793994990",
-            "expires": "2026-11-07T19:56:33.000Z",
+            "value": "GA1.3.585538817.1794167126",
+            "expires": "2026-11-09T19:45:34.000Z",
             "domain": "victoriagardens.com.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
           },
           {
             "key": "_dc_gtm_UA-94064707-1",
             "value": "1",
-            "expires": "2026-11-06T19:57:29.000Z",
+            "expires": "2026-11-08T19:46:25.000Z",
             "domain": "victoriagardens.com.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
-          },
-          {
-            "key": "_ga_BR2KQ2WDPJ",
-            "value": "GS2.1.s1793994989$o1$g1$t1793994993$j56$l0$h0",
-            "expires": "2027-12-11T19:56:33.206Z",
-            "domain": "victoriagardens.com.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
-          },
-          {
-            "key": "_ga",
-            "value": "GA1.1.655772785.1793994990",
-            "expires": "2027-12-11T19:56:33.206Z",
-            "domain": "victoriagardens.com.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:29.964Z",
-            "lastAccessed": "2026-11-06T19:56:33.358Z"
+            "creation": "2026-11-08T19:45:25.775Z",
+            "lastAccessed": "2026-11-08T19:45:34.737Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:27.842Z",
-      "createdAt": "2026-11-06T19:56:27.842Z",
+      "expiresAt": "2026-11-08T20:35:17.021Z",
+      "createdAt": "2026-11-08T19:45:17.021Z",
       "usageCount": 6,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_NLQQbm8eA7",
+      "id": "session_vYUgBE5FlP",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -232,14 +192,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:29.994Z",
-      "createdAt": "2026-11-06T19:56:29.994Z",
+      "expiresAt": "2026-11-08T20:35:28.332Z",
+      "createdAt": "2026-11-08T19:45:28.332Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_y93JvoVF3g",
+      "id": "session_rjtzXDNyjx",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -252,14 +212,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:29.994Z",
-      "createdAt": "2026-11-06T19:56:29.994Z",
+      "expiresAt": "2026-11-08T20:35:28.332Z",
+      "createdAt": "2026-11-08T19:45:28.332Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_JgyMygQHyO",
+      "id": "session_HLuX4XkCKB",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -272,14 +232,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:31.129Z",
-      "createdAt": "2026-11-06T19:56:31.129Z",
+      "expiresAt": "2026-11-08T20:35:28.333Z",
+      "createdAt": "2026-11-08T19:45:28.333Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_y8zlYttkLp",
+      "id": "session_MXORU3AvYj",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -292,14 +252,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:31.722Z",
-      "createdAt": "2026-11-06T19:56:31.722Z",
+      "expiresAt": "2026-11-08T20:35:32.515Z",
+      "createdAt": "2026-11-08T19:45:32.515Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_2Ym44hBGH1",
+      "id": "session_fqleJkm82F",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -312,14 +272,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:32.310Z",
-      "createdAt": "2026-11-06T19:56:32.310Z",
+      "expiresAt": "2026-11-08T20:35:33.093Z",
+      "createdAt": "2026-11-08T19:45:33.093Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_FtV2gPqP0X",
+      "id": "session_6a2IqSnbx4",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -332,14 +292,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:33.491Z",
-      "createdAt": "2026-11-06T19:56:33.491Z",
+      "expiresAt": "2026-11-08T20:35:37.397Z",
+      "createdAt": "2026-11-08T19:45:37.397Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_HPNMLoon9c",
+      "id": "session_GF3d5DUBlT",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -350,148 +310,99 @@
         "cookies": [
           {
             "key": "PHPSESSID",
-            "value": "81a2e2da97fe5ff1ee860d7fa5083c4c",
-            "expires": "2026-11-06T20:46:41.660Z",
-            "domain": "lviv.dityvmisti.ua",
+            "value": "u24rgf9ndingh830mjtsjr4p8s",
+            "expires": "2026-11-08T20:35:47.229Z",
+            "domain": "lviv.kontramarka.ua",
             "path": "/",
             "hostOnly": true,
-            "creation": "2026-11-06T19:56:41.644Z",
-            "lastAccessed": "2026-11-06T19:56:43.163Z"
+            "creation": "2026-11-08T19:45:47.229Z",
+            "lastAccessed": "2026-11-08T19:45:47.229Z"
           },
           {
-            "key": "fpestid",
-            "value": "jkGEoeXu3cmcUZfsb-QAJauUzyo3l39QO0K2ScaHlg1mOk7cGSTYTVDAUdI_VMP6wE1kGg",
-            "expires": "2027-11-06T19:56:40.838Z",
-            "domain": "dityvmisti.ua",
+            "key": "language",
+            "value": "uk",
+            "expires": "2026-12-08T19:45:44.810Z",
+            "domain": "lviv.kontramarka.ua",
+            "path": "/",
+            "hostOnly": true,
+            "creation": "2026-11-08T19:45:47.229Z",
+            "lastAccessed": "2026-11-08T19:45:47.229Z"
+          },
+          {
+            "key": "citySelected",
+            "value": "yes",
+            "expires": "2027-11-08T19:45:44.810Z",
+            "domain": "lviv.kontramarka.ua",
+            "path": "/",
+            "hostOnly": true,
+            "creation": "2026-11-08T19:45:47.230Z",
+            "lastAccessed": "2026-11-08T19:45:47.230Z"
+          },
+          {
+            "key": "firstTime_schedule_2019_2",
+            "value": "0",
+            "expires": "2027-11-08T19:45:45.000Z",
+            "domain": "lviv.kontramarka.ua",
+            "path": "/",
+            "hostOnly": true,
+            "creation": "2026-11-08T19:45:47.230Z",
+            "lastAccessed": "2026-11-08T19:45:47.230Z"
+          },
+          {
+            "key": "_gcl_au",
+            "value": "1.1.1361503089.1794167146",
+            "expires": "2027-02-06T19:45:45.000Z",
+            "domain": "kontramarka.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:45:47.230Z",
+            "lastAccessed": "2026-11-08T19:45:47.230Z"
+          },
+          {
+            "key": "cf_clearance",
+            "value": "ChWWx35w6vVfQ8UcWCx24RVBFXKycGgWOBFHl30mmu4v66WeZ1roqKPDGo9ItHC9iXzw0A3PmxivkEHemYwx68MbBnwgrKeBmS-quOeplfK9tlvCygGPtQ2ISG4Lq-Y9ah8hQVUmj_JQN3J8XU8wPcVzeJm5HFU0PTGWOA2Nz8bMNX2cCpmln-LknBMHjx5Rynb82zVHPnRhZBppvh87NjI7HYpKMAuDfIfuUoAAsIXm12xLY9LAUUpZ9pVzkjuwEQSPhPYcmoGHzs_JNIReqAvD26r0cmM70LBB2q6KhB9RBqSJh05WgVjySHGJPGsW2TzHapQ_v44davFc8uR5h57NW1wCsBW158F6_DhaXMpCNpMs",
+            "expires": "2027-11-08T19:45:45.774Z",
+            "domain": "kontramarka.ua",
             "path": "/",
             "secure": true,
+            "httpOnly": true,
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.644Z",
-            "lastAccessed": "2026-11-06T19:56:43.163Z"
+            "creation": "2026-11-08T19:45:47.235Z",
+            "lastAccessed": "2026-11-08T19:45:47.235Z"
           },
           {
-            "key": "_gcl_au",
-            "value": "1.1.1154510995.1793995001.-.-.1793995000.2127356959.1793995001.1793995002",
-            "expires": "2027-02-04T19:56:41.000Z",
-            "domain": "dityvmisti.ua",
+            "key": "_clck",
+            "value": "so8k4x%5E2%5Egaz%5E0%5E2503",
+            "expires": "2027-11-08T19:45:45.000Z",
+            "domain": "kontramarka.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.644Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
+            "creation": "2026-11-08T19:45:47.238Z",
+            "lastAccessed": "2026-11-08T19:45:47.238Z"
           },
           {
-            "key": "_ga_EWEGNHTX3X",
-            "value": "GS2.1.s1793995000$o1$g1$t1793995002$j58$l0$h0",
-            "expires": "2027-12-11T19:56:42.803Z",
-            "domain": "dityvmisti.ua",
+            "key": "_clsk",
+            "value": "n9bhzt%5E1794167146561%5E1%5E0%5Ef.clarity.ms%2Fcollect",
+            "expires": "2026-11-09T19:45:46.000Z",
+            "domain": "kontramarka.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_ga",
-            "value": "GA1.1.1895060049.1793995001",
-            "expires": "2027-12-11T19:56:42.898Z",
-            "domain": "dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_ga",
-            "value": "GA1.3.1895060049.1793995001",
-            "expires": "2027-12-11T19:56:43.157Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_gid",
-            "value": "GA1.3.1833816266.1793995001",
-            "expires": "2026-11-07T19:56:43.000Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_dc_gtm_UA-61727847-3",
-            "value": "1",
-            "expires": "2026-11-06T19:57:41.000Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_fbp",
-            "value": "fb.1.1793995001074.632208104614741786",
-            "expires": "2027-02-04T19:56:42.000Z",
-            "domain": "dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_gcl_au",
-            "value": "1.3.1154510995.1793995001.-.-.1793995000.2127356959.1793995001.1793995002",
-            "expires": "2027-12-11T19:56:42.959Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_gat_UA-61727847-3",
-            "value": "1",
-            "expires": "2026-11-06T19:57:41.000Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_ga_J4RMVPG9BG",
-            "value": "GS2.1.s1793995001$o1$g1$t1793995003$j58$l0$h0",
-            "expires": "2027-12-11T19:56:43.153Z",
-            "domain": "dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
-          },
-          {
-            "key": "_ga_JF4HMNWWTX",
-            "value": "GS2.3.s1793995001$o1$g1$t1793995003$j58$l0$h0",
-            "expires": "2027-12-11T19:56:43.155Z",
-            "domain": "lviv.dityvmisti.ua",
-            "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:41.645Z",
-            "lastAccessed": "2026-11-06T19:56:43.164Z"
+            "creation": "2026-11-08T19:45:47.238Z",
+            "lastAccessed": "2026-11-08T19:45:47.238Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:33.492Z",
-      "createdAt": "2026-11-06T19:56:33.492Z",
-      "usageCount": 6,
+      "expiresAt": "2026-11-08T20:35:37.397Z",
+      "createdAt": "2026-11-08T19:45:37.397Z",
+      "usageCount": 1,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_9Nig2N19fK",
+      "id": "session_TXSydnSM8z",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -504,114 +415,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:33.492Z",
-      "createdAt": "2026-11-06T19:56:33.492Z",
+      "expiresAt": "2026-11-08T20:38:05.651Z",
+      "createdAt": "2026-11-08T19:48:05.651Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_Hv4rmbEs3e",
-      "cookieJar": {
-        "version": "tough-cookie@5.1.2",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:41.683Z",
-      "createdAt": "2026-11-06T19:56:41.683Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_gYlyn7cgt6",
-      "cookieJar": {
-        "version": "tough-cookie@5.1.2",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:41.691Z",
-      "createdAt": "2026-11-06T19:56:41.691Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_ubCdqEEQ1q",
-      "cookieJar": {
-        "version": "tough-cookie@5.1.2",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:42.413Z",
-      "createdAt": "2026-11-06T19:56:42.413Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_QfZyrbOFJ9",
-      "cookieJar": {
-        "version": "tough-cookie@5.1.2",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:42.496Z",
-      "createdAt": "2026-11-06T19:56:42.496Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_xyp7pdHkiS",
-      "cookieJar": {
-        "version": "tough-cookie@5.1.2",
-        "storeType": "MemoryCookieStore",
-        "rejectPublicSuffixes": true,
-        "enableLooseMode": false,
-        "allowSpecialUseDomain": true,
-        "prefixSecurity": "silent",
-        "cookies": []
-      },
-      "userData": {},
-      "maxErrorScore": 3,
-      "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:43.254Z",
-      "createdAt": "2026-11-06T19:56:43.254Z",
-      "usageCount": 0,
-      "maxUsageCount": 50,
-      "errorScore": 0
-    },
-    {
-      "id": "session_LGr2ooLibp",
+      "id": "session_YZNfxmMZjL",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -621,59 +432,68 @@
         "prefixSecurity": "silent",
         "cookies": [
           {
-            "key": "XSRF-TOKEN",
-            "value": "eyJpdiI6IjVSVmRzQWppQU5HWEcxUmNQa3NMdWc9PSIsInZhbHVlIjoiT3BOTWp5VVZIU295ejNiZUpTencvbmFqaytLNWkzaCtrQ2NndkVxWEZMdUF2MGMyM2ZidTJLNGFGNC80blpEYVE1WHJSYzZFbVFaRSthZXNoQXlCZXRuVXB5Vi95cW5OazJldDFLSTVRUWF2ZDlVZnlIZ1RyRFl5dlNSSVdtSEMiLCJtYWMiOiI4ODE4ZTlhYmMzMGQ0YmQ1MDFhN2IwMTVhNmI5YTFjYWMxZmFlODQzZWEyNWE1ZGEzMzMwNmM0ZmE0OWQ5OGNlIiwidGFnIjoiIn0%3D",
-            "expires": "2026-11-06T21:56:48.325Z",
-            "domain": "lmb.lviv.ua",
+            "key": "PHPSESSID",
+            "value": "o7fdqeaubgndm0l16pfe4ag447",
+            "expires": "2026-11-08T20:38:08.232Z",
+            "domain": "lviv.kontramarka.ua",
             "path": "/",
             "hostOnly": true,
-            "creation": "2026-11-06T19:56:44.116Z",
-            "lastAccessed": "2026-11-06T19:56:48.489Z"
+            "creation": "2026-11-08T19:48:08.232Z",
+            "lastAccessed": "2026-11-08T19:48:08.232Z"
           },
           {
-            "key": "laravel_session",
-            "value": "eyJpdiI6IjUyKzRpR1FCUDZNVmNaVEVDQlNBWnc9PSIsInZhbHVlIjoicHQrOFpJa2xWcjFyMzNyVnV4M3lLM2YxbkFYSWVjNGM1S0lvZVhhR2pQWU1RRXNPeEExUGdOaGxud1BXclZqOGZWcXJOeVZETWRVNTZEWVFLV3g2OFdXUzJHWTI4SHA1TTljenFuTDlGNVZBUmFySXZoSjcwUUw5TzZRTzZpbWkiLCJtYWMiOiJlZGQ1MWZlNjE4YWRlYjAwZTcwYjFhZmVhMmJmMGI5M2JiNWI2OGVmMTEzYzliOGQxZGYwNjNhNzRmM2M1MWMzIiwidGFnIjoiIn0%3D",
-            "expires": "2026-11-06T21:56:48.325Z",
-            "domain": "lmb.lviv.ua",
+            "key": "language",
+            "value": "uk",
+            "expires": "2026-12-08T19:48:07.033Z",
+            "domain": "lviv.kontramarka.ua",
             "path": "/",
-            "httpOnly": true,
             "hostOnly": true,
-            "creation": "2026-11-06T19:56:44.116Z",
-            "lastAccessed": "2026-11-06T19:56:48.489Z"
+            "creation": "2026-11-08T19:48:08.232Z",
+            "lastAccessed": "2026-11-08T19:48:08.232Z"
           },
           {
-            "key": "_ga_K7CQBMM3BQ",
-            "value": "GS2.1.s1793995004$o1$g1$t1793995008$j56$l0$h0",
-            "expires": "2027-12-11T19:56:48.370Z",
-            "domain": "lmb.lviv.ua",
+            "key": "citySelected",
+            "value": "yes",
+            "expires": "2027-11-08T19:48:07.033Z",
+            "domain": "lviv.kontramarka.ua",
             "path": "/",
-            "hostOnly": false,
-            "creation": "2026-11-06T19:56:44.116Z",
-            "lastAccessed": "2026-11-06T19:56:48.489Z"
+            "hostOnly": true,
+            "creation": "2026-11-08T19:48:08.232Z",
+            "lastAccessed": "2026-11-08T19:48:08.232Z"
           },
           {
-            "key": "_ga",
-            "value": "GA1.1.1671438118.1793995004",
-            "expires": "2027-12-11T19:56:44.079Z",
-            "domain": "lmb.lviv.ua",
+            "key": "_gcl_au",
+            "value": "1.1.1580919830.1794167288.577526933.1794167288.1794167287.787669065.1794167288.1794167287",
+            "expires": "2027-02-06T19:48:08.000Z",
+            "domain": "kontramarka.ua",
             "path": "/",
             "hostOnly": false,
-            "creation": "2026-11-06T19:56:44.116Z",
-            "lastAccessed": "2026-11-06T19:56:48.488Z"
+            "creation": "2026-11-08T19:48:08.232Z",
+            "lastAccessed": "2026-11-08T19:48:08.232Z"
+          },
+          {
+            "key": "firstTime_schedule_2019_2",
+            "value": "0",
+            "expires": "2027-11-08T19:48:07.000Z",
+            "domain": "lviv.kontramarka.ua",
+            "path": "/",
+            "hostOnly": true,
+            "creation": "2026-11-08T19:48:08.232Z",
+            "lastAccessed": "2026-11-08T19:48:08.232Z"
           }
         ]
       },
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:43.254Z",
-      "createdAt": "2026-11-06T19:56:43.254Z",
-      "usageCount": 5,
+      "expiresAt": "2026-11-08T20:38:05.651Z",
+      "createdAt": "2026-11-08T19:48:05.651Z",
+      "usageCount": 1,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_pAX56Y7aRa",
+      "id": "session_EgSKEEa9LW",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -686,14 +506,107 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:45.881Z",
-      "createdAt": "2026-11-06T19:56:45.881Z",
+      "expiresAt": "2026-11-08T20:38:10.856Z",
+      "createdAt": "2026-11-08T19:48:10.856Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_rGQsChr2Bi",
+      "id": "session_XAznLpbpIy",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "cf_clearance",
+            "value": "Ck5-TL1GBXTLIeve2hCJjS1e4iipJWUmNvlnI4TF0DoBIpVDWGUXA01CNM4cmyvzM6-TqFUt9JVxa2yNqotGWszgugA_dkqSJRHUJ5Nl5e7_Y9NEW1G1s0Sy3bZcMCkXlfoQEjbxrT__r_9TeicZWZT0m26-VudtKY2RTJS1Pk7yZvaKRqP3MF9JSGgCgyYEY9U1XPCJTypwsT3FrFcmsNm1U19xz_3Y79NxRMdhrWL7SVLy-ttGzcDKiLt4BtNBq2Ex4yF7PmIBN-ryh3fQOFpJjq5OMp8NHs84dUKebGy94OiIwYrcNlNLFXEwsJTqz15JMaFaIdFUCuv4gsn91gNPaCLOzhjgaLbTA2uQlAL3Zlo",
+            "expires": "2027-11-08T19:48:18.831Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "secure": true,
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.528Z"
+          },
+          {
+            "key": "_gcl_au",
+            "value": "1.1.847692856.1794167299",
+            "expires": "2027-02-06T19:48:18.000Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.527Z"
+          },
+          {
+            "key": "_ga_BR2KQ2WDPJ",
+            "value": "GS2.1.s1794167299$o1$g1$t1794167308$j51$l0$h0",
+            "expires": "2027-12-13T19:48:28.348Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.528Z"
+          },
+          {
+            "key": "_fbp",
+            "value": "fb.2.1794167299081.93979250352523229",
+            "expires": "2027-02-06T19:48:28.000Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.527Z"
+          },
+          {
+            "key": "_ga",
+            "value": "GA1.1.851098776.1794167299",
+            "expires": "2027-12-13T19:48:28.348Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.528Z"
+          },
+          {
+            "key": "_gid",
+            "value": "GA1.3.206932990.1794167299",
+            "expires": "2026-11-09T19:48:28.000Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.527Z"
+          },
+          {
+            "key": "_dc_gtm_UA-94064707-1",
+            "value": "1",
+            "expires": "2026-11-08T19:49:19.000Z",
+            "domain": "victoriagardens.com.ua",
+            "path": "/",
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:19.344Z",
+            "lastAccessed": "2026-11-08T19:48:28.527Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-11-08T20:38:10.857Z",
+      "createdAt": "2026-11-08T19:48:10.857Z",
+      "usageCount": 6,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_TvzUwHGNnO",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -706,14 +619,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:46.384Z",
-      "createdAt": "2026-11-06T19:56:46.384Z",
+      "expiresAt": "2026-11-08T20:38:21.892Z",
+      "createdAt": "2026-11-08T19:48:21.892Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_k7ZNyfxG3K",
+      "id": "session_OOGuJuqmBd",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -726,14 +639,14 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:47.547Z",
-      "createdAt": "2026-11-06T19:56:47.547Z",
+      "expiresAt": "2026-11-08T20:38:21.892Z",
+      "createdAt": "2026-11-08T19:48:21.892Z",
       "usageCount": 0,
       "maxUsageCount": 50,
       "errorScore": 0
     },
     {
-      "id": "session_MdAzk8ueRG",
+      "id": "session_5R7dRo5hlJ",
       "cookieJar": {
         "version": "tough-cookie@5.1.2",
         "storeType": "MemoryCookieStore",
@@ -746,9 +659,112 @@
       "userData": {},
       "maxErrorScore": 3,
       "errorScoreDecrement": 0.5,
-      "expiresAt": "2026-11-06T20:46:48.199Z",
-      "createdAt": "2026-11-06T19:56:48.199Z",
+      "expiresAt": "2026-11-08T20:38:21.893Z",
+      "createdAt": "2026-11-08T19:48:21.893Z",
       "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_qtta0YfcTf",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-11-08T20:38:25.852Z",
+      "createdAt": "2026-11-08T19:48:25.852Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_vcXHc01u5o",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-11-08T20:38:26.540Z",
+      "createdAt": "2026-11-08T19:48:26.540Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_Jf1rns9jir",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": []
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-11-08T20:38:31.161Z",
+      "createdAt": "2026-11-08T19:48:31.161Z",
+      "usageCount": 0,
+      "maxUsageCount": 50,
+      "errorScore": 0
+    },
+    {
+      "id": "session_Ua67PKD0Gp",
+      "cookieJar": {
+        "version": "tough-cookie@5.1.2",
+        "storeType": "MemoryCookieStore",
+        "rejectPublicSuffixes": true,
+        "enableLooseMode": false,
+        "allowSpecialUseDomain": true,
+        "prefixSecurity": "silent",
+        "cookies": [
+          {
+            "key": "sid",
+            "value": "b4a2b02d77b496feeaefa4bcda25072b",
+            "expires": "2026-11-08T20:38:32.221Z",
+            "domain": "moemisto.ua",
+            "path": "/",
+            "httpOnly": true,
+            "hostOnly": false,
+            "creation": "2026-11-08T19:48:32.221Z",
+            "lastAccessed": "2026-11-08T19:48:32.221Z"
+          },
+          {
+            "key": "device_view",
+            "value": "full",
+            "expires": "2026-12-08T19:48:31.912Z",
+            "domain": "moemisto.ua",
+            "path": "/",
+            "httpOnly": true,
+            "hostOnly": true,
+            "creation": "2026-11-08T19:48:32.221Z",
+            "lastAccessed": "2026-11-08T19:48:32.221Z"
+          }
+        ]
+      },
+      "userData": {},
+      "maxErrorScore": 3,
+      "errorScoreDecrement": 0.5,
+      "expiresAt": "2026-11-08T20:38:31.161Z",
+      "createdAt": "2026-11-08T19:48:31.161Z",
+      "usageCount": 1,
       "maxUsageCount": 50,
       "errorScore": 0
     }

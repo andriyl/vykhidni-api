@@ -1,24 +1,24 @@
 import { chromium } from 'playwright'
-import { analyzeListing, detectFields, detectDetailFields } from './analyze.js'
-import { detectStructured, extractDetail, extractItems, getAction, normalizeActions } from '../scanner/extract.js'
-import { validateEvents } from './validate.js'
-import { pruneHtml, refineWithLLM } from './llm.js'
+import { MICRODATA_ITEM_SELECTOR, probeListing } from './probe.js'
+import {
+  extractDetail,
+  extractItems
+} from '../scanner/extract.js'
+import {
+  proposeRecipe,
+  pruneHtml,
+  refineDetail,
+  repairRecipe
+} from './llm.js'
+import {
+  autoScroll,
+  safeGoto,
+  USER_AGENT
+} from '../scanner/browser.js'
 
-const USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36'
-const MICRODATA_ITEM_SELECTOR = '[itemtype*="schema.org/Event"]'
-const HAS_YEAR_RE = /\d{4}/
-
-function siteNameFromTitle (title, startUrl) {
-  const cleaned =
-    typeof title === 'string' ? title.replace(/\s+/g, ' ').trim() : ''
-  if (cleaned) return cleaned.slice(0, 120)
-
-  try {
-    return new URL(startUrl).hostname
-  } catch {
-    return ''
-  }
-}
+const MAX_LLM_CALLS = 3
+const MIN_REPAIR_ITEMS = 3
+const DETAIL_FIELDS = ['title', 'date', 'location', 'image', 'description']
 
 export function normalizeStartUrl (value) {
   if (!value || typeof value !== 'string') {
@@ -31,124 +31,172 @@ export function normalizeStartUrl (value) {
   return parsed.toString()
 }
 
-function normalizeFields (value) {
-  if (!value || typeof value !== 'object') return null
-  const out = {}
-  for (const [field, chain] of Object.entries(value)) {
-    if (typeof chain === 'string') out[field] = [chain]
-    else if (Array.isArray(chain)) {
-      const clean = chain.filter((item) => typeof item === 'string' && item.trim())
-      if (clean.length) out[field] = clean
+function choosePagination (candidates = []) {
+  const url =
+    candidates.find((entry) => entry?.kind === 'url' && entry.selector) ||
+    candidates.find((entry) => entry?.kind === 'url')
+  const loadMore =
+    candidates.find((entry) => entry?.kind === 'loadMore' && entry.selector) ||
+    candidates.find((entry) => entry?.kind === 'loadMore')
+  return url || loadMore || null
+}
+
+function toPagination (candidate) {
+  if (!candidate) return { mode: 'none' }
+  if (candidate.kind === 'loadMore') {
+    return {
+      mode: 'loadMore',
+      selector: candidate.selector || null,
+      text: candidate.text || null
     }
   }
-  return Object.keys(out).length ? out : null
+  return {
+    mode: 'url',
+    selector: candidate.selector || null,
+    param: candidate.param || 'page'
+  }
 }
 
-function mergeFields (current, extra) {
-  const merged = { ...(current || {}) }
-  const next = normalizeFields(extra) || {}
-  for (const [field, chain] of Object.entries(next)) {
-    if (!merged[field] || merged[field].length === 0) {
-      merged[field] = chain
+function fallbackRecipe (candidate, pagination) {
+  return {
+    item: candidate?.selector || null,
+    link: ['a[href]'],
+    fields: {},
+    source: candidate?.selector === MICRODATA_ITEM_SELECTOR
+      ? 'microdata'
+      : 'fields',
+    pagination
+  }
+}
+
+function recipeFromDecision (decision, candidates, pagination) {
+  if (!decision?.item) return null
+  const allowed = new Set(candidates.map((candidate) => candidate.selector))
+  if (!allowed.has(decision.item)) return null
+
+  const chosenPagination =
+    decision.pagination && decision.pagination.mode !== 'none'
+      ? decision.pagination
+      : pagination.selector
+        ? pagination
+        : { mode: 'none' }
+
+  return {
+    item: decision.item,
+    link: decision.link || ['a[href]'],
+    fields: decision.fields || {},
+    source: decision.item === MICRODATA_ITEM_SELECTOR
+      ? 'microdata'
+      : 'fields',
+    pagination: chosenPagination
+  }
+}
+
+async function mergeRecipe (current, decision, page) {
+  const next = { ...current }
+  if (decision.item) {
+    const count = await page
+      .evaluate((selector) => {
+        try {
+          return document.querySelectorAll(selector).length
+        } catch {
+          return 0
+        }
+      }, decision.item)
+      .catch(() => 0)
+    if (count >= 3 || decision.item === MICRODATA_ITEM_SELECTOR) {
+      next.item = decision.item
     }
   }
-  return merged
+  if (decision.link) next.link = decision.link
+  if (decision.fields) next.fields = { ...(current.fields || {}), ...decision.fields }
+  if (decision.pagination) next.pagination = decision.pagination
+  next.source = next.item === MICRODATA_ITEM_SELECTOR ? 'microdata' : 'fields'
+  return next
 }
 
-/**
- * Для лістингу LLM може не лише додати нове поле, а й замінити поганий
- * евристичний селектор. Порівнюємо оцінки, які порахував detectFields().
- */
-function mergeDetectedFields (current, currentStats, extra, nextStats) {
-  const merged = { ...(current || {}) }
-  const stats = { ...(currentStats || {}) }
-  const next = normalizeFields(extra) || {}
+function candidateReport (candidate) {
+  if (!candidate) return null
+  const { selector, count, linkRatio, imageRatio, dateRatio, avgText, score } =
+    candidate
+  return { selector, count, linkRatio, imageRatio, dateRatio, avgText, score }
+}
 
-  for (const [field, chain] of Object.entries(next)) {
-    const hasCurrent = Array.isArray(merged[field]) && merged[field].length > 0
-    const currentScore = stats[field]?.score ?? 0
-    const nextScore = nextStats?.[field]?.score ?? 0
-
-    if (!hasCurrent || nextScore > currentScore + 0.05) {
-      merged[field] = chain
-      if (nextStats?.[field]) stats[field] = nextStats[field]
-    }
+function buildActions ({
+  pagination,
+  item,
+  link,
+  fields,
+  source,
+  detail,
+  seedUrls
+}) {
+  const actions = []
+  if (pagination?.mode === 'url') {
+    actions.push({
+      type: 'paginate',
+      mode: 'url',
+      selector: pagination.selector || null,
+      param: pagination.param || 'page',
+      maxPages: 5
+    })
+  } else if (pagination?.mode === 'loadMore') {
+    actions.push({
+      type: 'paginate',
+      mode: 'loadMore',
+      selector: pagination.selector || null,
+      text: pagination.text || null,
+      maxPages: 10
+    })
   }
 
-  return { fields: merged, stats }
-}
-
-async function safeGoto (page, url, { timeout = 45000 } = {}) {
-  const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout })
-  try { await page.waitForLoadState('networkidle', { timeout: 8000 }) } catch {}
-  await page.waitForTimeout(1200)
-  return response
-}
-
-async function autoScroll (page, rounds = 3) {
-  for (let i = 0; i < rounds; i += 1) {
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await page.waitForTimeout(900)
-  }
-}
-
-async function expandLoadMore (page, pagination, maxClicks = 4) {
-  if (pagination?.mode !== 'loadMore' || !pagination.selector) return 0
-  let clicks = 0
-  for (let i = 0; i < maxClicks; i += 1) {
-    const clicked = await page.evaluate((selector) => {
-      let el = null
-      try { el = document.querySelector(selector) } catch { return false }
-      if (!el) return false
-      const target = el.tagName === 'BUTTON' || el.tagName === 'A' ? el : (el.querySelector('button,a') || el)
-      if (!target || target.offsetParent === null) return false
-      target.scrollIntoView({ block: 'center' })
-      target.click()
-      return true
-    }, pagination.selector)
-    if (!clicked) break
-    await page.waitForTimeout(1800)
-    clicks += 1
-  }
-  return clicks
-}
-
-async function itemSnippets (page, selector, limit = 2) {
-  try {
-    return await page.evaluate(({ selector, limit }) => [...document.querySelectorAll(selector)].slice(0, limit).map(el => el.outerHTML), { selector, limit })
-  } catch { return [] }
+  actions.push({
+    type: 'extractListItems',
+    item,
+    link: link || ['a[href]'],
+    fields: fields || {},
+    source: source === 'microdata' ? 'microdata' : 'fields'
+  })
+  actions.push({
+    type: 'extractDetails',
+    url: detail?.url || null,
+    source: 'auto',
+    fields: detail?.fields || {}
+  })
+  if (seedUrls?.length) actions.push({ type: 'seedUrls', urls: seedUrls })
+  return actions
 }
 
 async function detailSnippet (page) {
   try {
     return await page.evaluate(() => {
-      const root = document.querySelector('article') || document.querySelector('main') || document.body
+      const root =
+        document.querySelector('article') ||
+        document.querySelector('main') ||
+        document.body
       return root ? root.innerHTML : ''
     })
-  } catch { return '' }
+  } catch {
+    return ''
+  }
 }
 
-function buildActions ({ listing, itemSelector, link, fields, sourceType, detail }) {
-  const actions = []
-  const pagination = listing.pagination || { mode: 'none' }
-  const cleanFields = { ...(fields || {}) }
-  delete cleanFields.link
-  if (pagination.mode === 'url') actions.push({ type: 'paginate', mode: 'url', selector: pagination.selector || null, param: pagination.param || 'page', maxPages: 5 })
-  else if (pagination.mode === 'loadMore') actions.push({ type: 'paginate', mode: 'loadMore', selector: pagination.selector || null, text: pagination.text || null, maxPages: 10 })
-  actions.push({ type: 'extractListItems', item: itemSelector, link: link || ['[itemprop="url"]', 'a[href]'], fields: cleanFields, source: sourceType === 'microdata' ? 'microdata' : 'fields' })
-  actions.push({ type: 'extractDetails', url: detail?.url || null, source: 'auto', fields: detail?.fields || {} })
-  if (pagination.seedUrls?.length) actions.push({ type: 'seedUrls', urls: pagination.seedUrls })
-  return actions
-}
-
-export async function discoverSite (rawUrl, { log = () => {}, useLLM = true, maxItems = 20 } = {}) {
+export async function discoverSite (
+  rawUrl,
+  { log = () => {}, useLLM = true } = {}
+) {
   const startUrl = normalizeStartUrl(rawUrl)
   const startedAt = new Date()
   const warnings = []
   let llmCalls = 0
+  let llmTokens = 0
 
   const browser = await chromium.launch({ headless: true })
-  const context = await browser.newContext({ userAgent: USER_AGENT, viewport: { width: 1440, height: 1000 }, locale: 'uk-UA' })
+  const context = await browser.newContext({
+    userAgent: USER_AGENT,
+    viewport: { width: 1440, height: 1000 },
+    locale: 'uk-UA'
+  })
 
   try {
     log(`🌐 Відкриваємо ${startUrl}`)
@@ -157,104 +205,201 @@ export async function discoverSite (rawUrl, { log = () => {}, useLLM = true, max
     await autoScroll(page)
 
     log('🔍 Аналізуємо структуру сторінки...')
-    let listing = await analyzeListing(page)
+    const probe = await probeListing(page)
+    const candidates = (probe.candidates || []).slice(0, 3)
+    const defaultPagination = toPagination(
+      choosePagination(probe.pagination)
+    )
 
-    if (listing.pagination?.mode === 'loadMore') {
-      log('➕ Розгортаємо «Показати ще»...')
-      const clicks = await expandLoadMore(page, listing.pagination)
-      if (clicks) { await autoScroll(page, 1); listing = await analyzeListing(page) }
-    }
-
+    let recipe = null
     let sourceType = 'heuristic'
-    let itemSelector = null
-    let link = ['[itemprop="url"]', 'a[href]']
 
-    if (listing.structured?.microdataEvents >= 3) {
-      sourceType = 'microdata'
-      itemSelector = MICRODATA_ITEM_SELECTOR
-    } else {
-      const candidate = listing.candidates?.find(e => e.linkRatio >= 0.6 && e.score > 0) || listing.candidates?.[0]
-      if (!candidate) throw new Error('Не вдалося знайти список подій на сторінці (немає повторюваних карток)')
-      if (candidate.linkRatio < 0.6) warnings.push(`Лише ${Math.round(candidate.linkRatio * 100)}% карток мають посилання`)
-      itemSelector = candidate.selector
-      listing.chosenCandidate = candidate
+    // Fast path: microdata listing. No LLM needed when the data is complete.
+    if (probe.structured?.microdataEvents >= 3) {
+      const microdataRecipe = {
+        item: MICRODATA_ITEM_SELECTOR,
+        link: ['[itemprop="url"]', 'a[href]'],
+        fields: {},
+        source: 'microdata',
+        pagination: defaultPagination
+      }
+      const sample = await extractItems(page, microdataRecipe)
+      if (sample.length >= MIN_REPAIR_ITEMS) {
+        recipe = microdataRecipe
+        sourceType = 'microdata'
+        log(`✅ Знайдено microdata-картки: ${sample.length}`)
+      }
     }
 
-    log(`🧩 Знайдено картки: ${itemSelector}`)
-    const detected = await detectFields(page, itemSelector, { limit: 8 })
-    let fields = detected.fields || {}
-    let fieldStats = detected.stats || {}
-
-    if (!fields.title) warnings.push('Не вдалося визначити селектор title евристикою')
-    if (!fields.date) warnings.push('Не вдалося визначити селектор date евристикою')
-
-    const extractRecipe = () => ({ item: itemSelector, link, fields, source: sourceType === 'microdata' ? 'microdata' : 'fields' })
-    let preview = (await extractItems(page, extractRecipe())).slice(0, maxItems)
-    let validation = validateEvents(preview)
-
-    const missing = ['title', 'date', 'image', 'location', 'description'].filter(f => (validation.fill?.[f] || 0) < 0.85)
-    if (useLLM && (validation.score < 0.8 || !fields.title || !fields.date || missing.includes('title') || missing.includes('date'))) {
-      log('🤖 Уточнюємо селектори через Gemini...')
-      const snippets = (await itemSnippets(page, itemSelector, 2)).map(s => pruneHtml(s))
-      const refined = await refineWithLLM({ itemSnippets: snippets, currentFields: fields, missingFields: [...new Set([...missing, 'title', 'date', 'image'])], kind: 'listing' })
-      llmCalls += 1
-      if (refined?.item) {
-        const count = await page.evaluate((sel) => document.querySelectorAll(sel).length, refined.item).catch(() => 0)
-        if (count >= 3) { itemSelector = refined.item; link = refined.link || link } else warnings.push('LLM запропонував item-селектор, який не знайшов карток')
-      }
-      if (refined?.fields || refined?.item) {
-        const tested = await detectFields(page, itemSelector, {
-          limit: 8,
-          candidates: refined?.fields || undefined
-        })
-        const merged = mergeDetectedFields(
-          fields,
-          fieldStats,
-          tested.fields,
-          tested.stats
+    // LLM path, or a deterministic fallback when LLM is disabled.
+    if (!recipe) {
+      if (!candidates.length) {
+        throw new Error(
+          'Не вдалося знайти список подій на сторінці (немає повторюваних карток)'
         )
-        fields = merged.fields
-        fieldStats = merged.stats
       }
-      preview = (await extractItems(page, extractRecipe())).slice(0, maxItems)
-      validation = validateEvents(preview)
+
+      if (!useLLM) {
+        recipe = fallbackRecipe(candidates[0], defaultPagination)
+        warnings.push(
+          'LLM вимкнено — використано першого кандидата та загальні селектори'
+        )
+      } else {
+        log('🤖 Підбираємо селектори через Gemini...')
+        const { data, usage } = await proposeRecipe({
+          url: startUrl,
+          title: probe.title,
+          candidates: candidates.map((candidate) => ({
+            selector: candidate.selector,
+            count: candidate.count,
+            html: pruneHtml(candidate.html, 1800)
+          })),
+          pagination: probe.pagination || [],
+          structured: probe.structured
+        })
+        llmCalls += 1
+        llmTokens += usage?.totalTokenCount || 0
+
+        recipe = recipeFromDecision(data, candidates, defaultPagination)
+        if (recipe) {
+          sourceType =
+            recipe.item === MICRODATA_ITEM_SELECTOR ? 'microdata' : 'llm'
+        }
+        if (!recipe) {
+          warnings.push(
+            'LLM не повернув валідний рецепт — використано евристичний fallback'
+          )
+          recipe = fallbackRecipe(candidates[0], defaultPagination)
+        }
+      }
     }
 
-    const detailUrl = preview.find(e => e.url)?.url || null
-    const detail = { url: detailUrl, source: 'auto', fields: {}, structured: null }
+    let preview = await extractItems(page, recipe)
+
+    // One repair call when extraction yields too few cards. Acceptance is
+    // based only on the number of extracted events, not on field quality.
+    const chosen =
+      candidates.find((candidate) => candidate.selector === recipe.item) ||
+      candidates[0]
+    const tooFew =
+      preview.length === 0 ||
+      (chosen?.count >= MIN_REPAIR_ITEMS && preview.length < MIN_REPAIR_ITEMS)
+
+    if (tooFew && useLLM && llmCalls < MAX_LLM_CALLS) {
+      log('🤖 Уточнюємо селектори за результатами перевірки...')
+      const { data, usage } = await repairRecipe({
+        cardHtml: pruneHtml(chosen?.html || '', 2200),
+        sample: preview.slice(0, 3),
+        failures: ['item', 'title', 'date'],
+        current: {
+          item: recipe.item,
+          link: recipe.link,
+          fields: recipe.fields
+        }
+      })
+      llmCalls += 1
+      llmTokens += usage?.totalTokenCount || 0
+
+      if (data) {
+        const repaired = await mergeRecipe(recipe, data, page)
+        const repairedPreview = await extractItems(page, repaired)
+        if (repairedPreview.length > preview.length) {
+          recipe = repaired
+          preview = repairedPreview
+          if (repaired.item !== MICRODATA_ITEM_SELECTOR) sourceType = 'llm'
+        }
+      }
+    }
+
+    if (!preview.length) warnings.push('Не знайдено жодної події')
+
+    // Detail page: generic + structured data first, LLM only as a fallback.
+    const detailUrl = preview.find((event) => event.url)?.url || null
+    const detail = {
+      url: detailUrl,
+      source: 'auto',
+      fields: {},
+      structured: null,
+      event: null
+    }
+
     if (detailUrl) {
       log(`📄 Аналізуємо сторінку події: ${detailUrl}`)
       const detailPage = await context.newPage()
       try {
         await safeGoto(detailPage, detailUrl)
-        detail.structured = await detectStructured(detailPage)
-        const detectedDetail = await detectDetailFields(detailPage)
-        detail.fields = detectedDetail.fields || {}
-        detail.event = await extractDetail(detailPage, { source: 'auto', fields: detail.fields })
-        const currentDetail = validateEvents([detail.event])
-        detail.validation = currentDetail
-        const detailMissing = ['title', 'date', 'location', 'image', 'description'].filter(f => (currentDetail.fill?.[f] || 0) < 1)
-        // Якщо microdata частковий або поля не знайдені - обов'язково використовуємо LLM для детальної сторінки
-        if (useLLM && llmCalls < 4 && detailMissing.length) {
-          log('🤖 Пошук полів на сторінці події через LLM...')
-          const snippet = pruneHtml(await detailSnippet(detailPage), 14000)
-          const refined = await refineWithLLM({ detailSnippet: snippet, currentFields: detail.fields, missingFields: detailMissing, kind: 'detail' })
+        const first = await extractDetail(
+          detailPage,
+          { source: 'auto', fields: {} },
+          { withMeta: true }
+        )
+        detail.structured = first.structured
+        let detailEvent = first.event
+        const missing = DETAIL_FIELDS.filter((field) => !detailEvent?.[field])
+
+        if (useLLM && missing.length && llmCalls < MAX_LLM_CALLS) {
+          log('🤖 Уточнюємо поля сторінки події через Gemini...')
+          const { data, usage } = await refineDetail({
+            detailHtml: pruneHtml(await detailSnippet(detailPage), 6000),
+            currentFields: {},
+            missingFields: missing
+          })
           llmCalls += 1
-          if (refined?.fields) {
-            detail.fields = mergeFields(detail.fields, refined.fields)
-            detail.event = await extractDetail(detailPage, { source: 'auto', fields: detail.fields })
+          llmTokens += usage?.totalTokenCount || 0
+
+          if (data?.fields) {
+            detail.fields = data.fields
+            detailEvent = await extractDetail(detailPage, {
+              source: 'auto',
+              fields: data.fields
+            })
           }
         }
-      } catch (e) { warnings.push(`Не вдалося проаналізувати сторінку події: ${e.message}`) } finally { await detailPage.close().catch(() => {}) }
+
+        detail.event = detailEvent
+      } catch (error) {
+        warnings.push(
+          `Не вдалося проаналізувати сторінку події: ${error.message}`
+        )
+      } finally {
+        await detailPage.close().catch(() => {})
+      }
     }
 
-    // Автодозаповнення дітейлів під час дискавері прибрано. Тільки перевірка зі списку.
+    const previewEvent = preview[0] ? { ...preview[0] } : null
+    if (previewEvent && detail.event) {
+      if (detail.event.date && !previewEvent.date) {
+        previewEvent.date = detail.event.date
+      }
+      for (const key of ['title', 'time', 'location', 'image']) {
+        if (!previewEvent[key] && detail.event[key]) previewEvent[key] = detail.event[key]
+      }
+      if (
+        detail.event.description &&
+        (!previewEvent.description ||
+          detail.event.description.length > previewEvent.description.length)
+      ) {
+        previewEvent.description = detail.event.description
+      }
+    }
 
-    if (!validation.total) warnings.push('Попередній прогін не знайшов жодної події')
-    if (validation.futureRate === 0 && validation.dateRate > 0) warnings.push('Усі знайдені дати в минулому — перевірте, чи це архів, а не афіша')
+    const pagination = recipe.pagination || { mode: 'none' }
+    const actions = buildActions({
+      pagination,
+      item: recipe.item,
+      link: recipe.link,
+      fields: recipe.fields,
+      source: recipe.source,
+      detail,
+      seedUrls: probe.seedUrls
+    })
 
-    const actions = buildActions({ listing, itemSelector, link, fields, sourceType, detail })
     const finishedAt = new Date()
+    const chosenCandidate =
+      (probe.candidates || []).find(
+        (candidate) => candidate.selector === recipe.item
+      ) || null
+
     const report = {
       status: 'done',
       startedAt: startedAt.toISOString(),
@@ -262,53 +407,31 @@ export async function discoverSite (rawUrl, { log = () => {}, useLLM = true, max
       durationMs: finishedAt - startedAt,
       url: startUrl,
       finalUrl: page.url(),
-      pageTitle: listing.title,
+      pageTitle: probe.title,
       sourceType,
-      itemSelector,
-      fieldStats,
-      structured: listing.structured,
-      candidates: (listing.candidates || []).slice(0, 5),
-      chosenCandidate: listing.chosenCandidate || null,
-      pagination: listing.pagination,
-      detail: { url: detail.url, source: detail.source, fields: detail.fields, structured: detail.structured, sample: detail.event || null },
-      validation,
+      itemSelector: recipe.item,
+      total: preview.length,
+      structured: probe.structured,
+      candidates: (probe.candidates || [])
+        .slice(0, 5)
+        .map(candidateReport),
+      chosenCandidate: candidateReport(chosenCandidate),
+      pagination,
+      detail,
+      preview: previewEvent,
       warnings: [...new Set(warnings)],
       llmCalls,
-      preview: preview.slice(0, 12)
+      llmTokens
     }
 
-    return { name: siteNameFromTitle(listing.title, startUrl), startUrl, actions, sourceType, confidence: validation.score, report }
-  } finally { await browser.close().catch(() => {}) }
-}
-
-export async function previewSiteConfig (config, { limit = 10, details = true, log = () => {} } = {}) {
-  const actions = normalizeActions(config.actions)
-  const listAction = getAction(actions, 'extractListItems')
-  if (!listAction) throw new Error('Конфіг не містить дії extractListItems')
-  const paginate = getAction(actions, 'paginate')
-  const detailAction = getAction(actions, 'extractDetails') || { source: 'auto', fields: {} }
-
-  const browser = await chromium.launch({ headless: true })
-  const context = await browser.newContext({ userAgent: USER_AGENT, viewport: { width: 1440, height: 1000 }, locale: 'uk-UA' })
-  try {
-    const page = await context.newPage()
-    await safeGoto(page, config.startUrl)
-    await autoScroll(page)
-    if (paginate?.mode === 'loadMore') { const clicks = await expandLoadMore(page, paginate, 2); if (clicks) await page.waitForTimeout(1000) }
-    const events = (await extractItems(page, listAction)).slice(0, limit)
-    if (details) {
-      const needsDetail = events.filter(e => !e.description || !e.location || !e.image || (e.date && !HAS_YEAR_RE.test(e.date))).slice(0, 5)
-      for (const event of needsDetail) {
-        const detailPage = await context.newPage()
-        try {
-          log(`📄 ${event.url}`)
-          await safeGoto(detailPage, event.url)
-          const detail = await extractDetail(detailPage, detailAction)
-          if (detail.date && HAS_YEAR_RE.test(detail.date) && (!event.date || !HAS_YEAR_RE.test(event.date))) event.date = detail.date
-          for (const key of ['title', 'time', 'location', 'description', 'image']) if (!event[key] && detail[key]) event[key] = detail[key]
-        } catch (e) { log(`⚠️ Не вдалося відкрити детейл: ${e.message}`) } finally { await detailPage.close().catch(() => {}) }
-      }
+    return {
+      name: '',
+      startUrl,
+      actions,
+      sourceType,
+      report
     }
-    return { events, validation: validateEvents(events) }
-  } finally { await browser.close().catch(() => {}) }
+  } finally {
+    await browser.close().catch(() => {})
+  }
 }

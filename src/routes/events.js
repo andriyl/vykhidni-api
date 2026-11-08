@@ -1,5 +1,4 @@
 import 'dotenv/config'
-import { getCoordinates, toUnix } from '../utils.js'
 import { prisma } from '../db/prisma.js'
 
 const EVENT_STATUSES = new Set([
@@ -105,50 +104,6 @@ export default async function eventRoutes (fastify) {
   })
 
   // POST /events
-  fastify.post('/events', async (request, reply) => {
-    try {
-      const {
-        title, date, time, location, description, image, url, siteConfigId
-      } = request.body
-
-      if (!title || !url || !siteConfigId) {
-        return reply.code(400).send({ error: 'Missing required fields' })
-      }
-
-      const configId = Number(siteConfigId)
-      if (!Number.isInteger(configId)) {
-        return reply.code(400).send({ error: 'Invalid siteConfigId' })
-      }
-
-      const coords = await getCoordinates(location)
-      const newEvent = await prisma.event.create({
-        data: {
-          title,
-          date,
-          time,
-          location,
-          description,
-          image,
-          url,
-          siteConfigId: configId,
-          unixTime: toUnix(date, time) ?? null,
-          coordinates: coords ? `${coords.lat},${coords.lon}` : null
-        }
-      })
-
-      return newEvent
-    } catch (err) {
-      console.error(err)
-      if (err.code === 'P2002') {
-        return reply.code(409).send({ error: 'Подія з таким url вже існує' })
-      }
-      if (err.code === 'P2003') {
-        return reply.code(400).send({ error: 'siteConfigId не існує' })
-      }
-      return reply.code(500).send({ error: 'Server error' })
-    }
-  })
-
   fastify.patch('/events/:id', async (request, reply) => {
     const eventId = Number.parseInt(request.params.id, 10)
     if (!Number.isInteger(eventId)) {
@@ -214,41 +169,6 @@ export default async function eventRoutes (fastify) {
         return reply.code(404).send({ error: 'Event not found' })
       }
 
-      const nextDate = dataToUpdate.date !== undefined
-        ? dataToUpdate.date
-        : existing.date
-      const nextTime = dataToUpdate.time !== undefined
-        ? dataToUpdate.time
-        : existing.time
-      const nextLocation = dataToUpdate.location !== undefined
-        ? dataToUpdate.location
-        : existing.location
-      const nextStatus = dataToUpdate.status !== undefined
-        ? dataToUpdate.status
-        : existing.status
-
-      const dateChanged =
-        dataToUpdate.date !== undefined || dataToUpdate.time !== undefined
-      const locationChanged = dataToUpdate.location !== undefined
-      const approvedNow =
-        nextStatus !== existing.status &&
-        (nextStatus === 'APPROVED' || nextStatus === 'APPROVED_BY_AI')
-
-      // unixTime залежить від date/time, тому перераховуємо його при будь-якій
-      // зміні цих полів, а не лише при переході DRAFT → APPROVED.
-      if (dateChanged || (approvedNow && existing.unixTime === null)) {
-        dataToUpdate.unixTime = toUnix(nextDate, nextTime) ?? null
-      }
-
-      // Координати перераховуємо лише коли змінилася локація (або при
-      // затвердженні, якщо їх ще немає), щоб не робити зайвих запитів до API.
-      if (locationChanged || (approvedNow && !existing.coordinates)) {
-        const coords = await getCoordinates(nextLocation)
-        dataToUpdate.coordinates = coords
-          ? `${coords.lat},${coords.lon}`
-          : null
-      }
-
       const updated = await prisma.event.update({
         where: { id: eventId },
         data: dataToUpdate
@@ -256,7 +176,7 @@ export default async function eventRoutes (fastify) {
 
       return updated
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       if (err.code === 'P2025') {
         return reply.code(404).send({ error: 'Event not found' })
       }
@@ -281,7 +201,7 @@ export default async function eventRoutes (fastify) {
 
       return { success: true }
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       return reply
         .code(404)
         .send({ error: 'Event not found or cannot delete' })

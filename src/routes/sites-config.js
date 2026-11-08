@@ -2,12 +2,14 @@ import { prisma } from '../db/prisma.js'
 import { broadcastLog } from '../utils.js'
 import {
   discoverSite,
-  normalizeStartUrl,
-  previewSiteConfig
+  normalizeStartUrl
 } from '../discovery/discover.js'
 import { getScanState, stopScan } from '../scanner/scanner.js'
 
 const activeDiscoveries = new Set()
+
+const NOT_FOUND = 'SiteConfig not found'
+const INVALID_ID = 'Invalid SiteConfig id'
 
 function parseId (value) {
   const id = Number(value)
@@ -30,40 +32,24 @@ async function runDiscoveryJob (id, url, { name, useLLM = true, previous = null 
         name: name || result.name,
         actions: result.actions,
         sourceType: result.sourceType,
-        confidence: result.confidence,
         discoveryReport: result.report,
-        lastValidatedAt: new Date(),
-        status: 'REVIEW',
-        isActive: false
+        status: 'REVIEW'
       }
     })
 
-    await prisma.siteConfigVersion
-      .create({
-        data: {
-          siteConfigId: id,
-          actions: result.actions,
-          sourceType: result.sourceType,
-          note: 'Auto-discovery'
-        }
-      })
-      .catch((error) => log(`⚠️ Не вдалося зберегти версію конфігу: ${error.message}`))
-
     log(
-      `✅ Дискавері завершено: ${result.report.validation.total} подій, ` +
-        `confidence ${result.confidence}. Сайт у статусі REVIEW.`
+      `✅ Дискавері завершено: ${result.report.total} подій. ` +
+        'Сайт у статусі REVIEW.'
     )
     return updated
   } catch (error) {
     log(`❌ Дискавері не вдалося: ${error.message}`)
 
-    // Не залишаємо раніше робочий сайт вимкненим через невдалий дискавері.
     await prisma.siteConfig
       .update({
         where: { id },
         data: {
-          status: previous?.status || 'FAILED',
-          isActive: previous?.isActive ?? false,
+          status: previous ? previous.status : 'FAILED',
           discoveryReport: {
             status: 'failed',
             error: error.message,
@@ -88,13 +74,16 @@ export default async function siteConfigRoutes (fastify) {
     const skip = Number.isInteger(start) && start >= 0 ? start : 0
     const take = Number.isInteger(end) && end > skip ? end - skip : 10
 
+    const where = { deletedAt: null }
+
     const [data, total] = await Promise.all([
       prisma.siteConfig.findMany({
+        where,
         skip,
         take,
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.siteConfig.count()
+      prisma.siteConfig.count({ where })
     ])
 
     reply
@@ -106,14 +95,14 @@ export default async function siteConfigRoutes (fastify) {
 
   fastify.get('/site_configs/:id', async (request, reply) => {
     const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
+    if (!id) return reply.code(400).send({ error: INVALID_ID })
 
-    const config = await prisma.siteConfig.findUnique({
-      where: { id }
+    const config = await prisma.siteConfig.findFirst({
+      where: { id, deletedAt: null }
     })
 
     if (!config) {
-      return reply.code(404).send({ error: 'SiteConfig not found' })
+      return reply.code(404).send({ error: NOT_FOUND })
     }
 
     return config
@@ -153,7 +142,7 @@ export default async function siteConfigRoutes (fastify) {
       }
 
       const previous = existing
-        ? { status: existing.status, isActive: existing.isActive }
+        ? { status: existing.status }
         : null
 
       const config = await prisma.siteConfig.upsert({
@@ -162,7 +151,6 @@ export default async function siteConfigRoutes (fastify) {
           name: trimmedName,
           startUrl,
           actions: [],
-          isActive: false,
           status: 'DRAFT',
           discoveryReport: {
             status: 'running',
@@ -172,6 +160,8 @@ export default async function siteConfigRoutes (fastify) {
         },
         update: {
           name: trimmedName,
+          // Повторне додавання м'яко видаленого сайту відновлює його.
+          deletedAt: null,
           discoveryReport: {
             status: 'running',
             startedAt: new Date().toISOString(),
@@ -209,7 +199,7 @@ export default async function siteConfigRoutes (fastify) {
         exists: !!existing
       })
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       if (err.code === 'P2002') {
         return reply.code(409).send({
           error: 'Сайт з таким URL вже створюється, спробуйте ще раз'
@@ -221,14 +211,14 @@ export default async function siteConfigRoutes (fastify) {
 
   fastify.get('/site_configs/:id/discovery', async (request, reply) => {
     const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
+    if (!id) return reply.code(400).send({ error: INVALID_ID })
 
-    const config = await prisma.siteConfig.findUnique({
-      where: { id }
+    const config = await prisma.siteConfig.findFirst({
+      where: { id, deletedAt: null }
     })
 
     if (!config) {
-      return reply.code(404).send({ error: 'SiteConfig not found' })
+      return reply.code(404).send({ error: NOT_FOUND })
     }
 
     return {
@@ -236,100 +226,37 @@ export default async function siteConfigRoutes (fastify) {
       name: config.name,
       startUrl: config.startUrl,
       status: config.status,
-      isActive: config.isActive,
       sourceType: config.sourceType,
-      confidence: config.confidence,
       actions: config.actions,
       report: config.discoveryReport,
-      lastValidatedAt: config.lastValidatedAt,
       updatedAt: config.updatedAt
-    }
-  })
-
-  // Сухий прогін збереженого конфігу: нічого не пише в Event.
-  fastify.get('/site_configs/:id/preview', async (request, reply) => {
-    const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
-
-    const config = await prisma.siteConfig.findUnique({
-      where: { id }
-    })
-
-    if (!config) {
-      return reply.code(404).send({ error: 'SiteConfig not found' })
-    }
-
-    const requestedLimit = Number.parseInt(request.query.limit, 10)
-    const limit = Math.min(
-      Math.max(Number.isInteger(requestedLimit) ? requestedLimit : 10, 1),
-      50
-    )
-    const details = request.query.details !== 'false'
-
-    try {
-      const result = await previewSiteConfig(config, {
-        limit,
-        details,
-        log: (message) => broadcastLog(`[#${id}] ${message}`)
-      })
-      return {
-        id: config.id,
-        name: config.name,
-        startUrl: config.startUrl,
-        ...result
-      }
-    } catch (error) {
-      return reply.code(400).send({ error: error.message })
     }
   })
 
   fastify.post('/site_configs/:id/activate', async (request, reply) => {
     const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
+    if (!id) return reply.code(400).send({ error: INVALID_ID })
 
     try {
+      const existing = await prisma.siteConfig.findFirst({
+        where: { id, deletedAt: null },
+        select: { id: true }
+      })
+      if (!existing) {
+        return reply.code(404).send({ error: NOT_FOUND })
+      }
+
       const updated = await prisma.siteConfig.update({
         where: { id },
-        data: { isActive: true, status: 'ACTIVE' }
+        data: { status: 'ACTIVE' }
       })
-
-      await prisma.siteConfigVersion
-        .create({
-          data: {
-            siteConfigId: id,
-            actions: updated.actions,
-            sourceType: updated.sourceType,
-            note: 'Activated after review'
-          }
-        })
-        .catch((error) => {
-          broadcastLog(
-            `[#${id}] ⚠️ Не вдалося зберегти версію конфігу: ${error.message}`
-          )
-        })
 
       broadcastLog(`✅ Сайт #${id} активовано: ${updated.name}`)
       // Не запускаємо сканування автоматично - лише по кнопці в адмінці
       return updated
     } catch (err) {
-      console.error(err)
-      return reply.code(404).send({ error: 'SiteConfig not found' })
-    }
-  })
-
-  fastify.post('/site_configs/:id/deactivate', async (request, reply) => {
-    const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
-
-    try {
-      const updated = await prisma.siteConfig.update({
-        where: { id },
-        data: { isActive: false, status: 'REVIEW' }
-      })
-      return updated
-    } catch (err) {
-      console.error(err)
-      return reply.code(404).send({ error: 'SiteConfig not found' })
+      fastify.log.error(err)
+      return reply.code(404).send({ error: NOT_FOUND })
     }
   })
 
@@ -343,17 +270,17 @@ export default async function siteConfigRoutes (fastify) {
       const result = await stopScan('admin')
       return result
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       return reply.code(500).send({ error: err.message })
     }
   })
 
   fastify.patch('/site_configs/:id', async (request, reply) => {
     const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
+    if (!id) return reply.code(400).send({ error: INVALID_ID })
 
     const body = request.body || {}
-    const { name, startUrl, actions, isActive } = body
+    const { name, startUrl, actions, status } = body
     const data = {}
 
     if (name !== undefined) {
@@ -377,12 +304,12 @@ export default async function siteConfigRoutes (fastify) {
       data.actions = actions
     }
 
-    if (isActive !== undefined) {
-      if (typeof isActive !== 'boolean') {
-        return reply.code(400).send({ error: 'isActive має бути boolean' })
+    if (status !== undefined) {
+      const allowed = ['ACTIVE', 'REVIEW', 'DRAFT', 'FAILED']
+      if (typeof status !== 'string' || !allowed.includes(status)) {
+        return reply.code(400).send({ error: 'Некоректний status' })
       }
-      data.isActive = isActive
-      data.status = isActive ? 'ACTIVE' : 'REVIEW'
+      data.status = status
     }
 
     if (!Object.keys(data).length) {
@@ -390,33 +317,24 @@ export default async function siteConfigRoutes (fastify) {
     }
 
     try {
+      const existing = await prisma.siteConfig.findFirst({
+        where: { id, deletedAt: null },
+        select: { id: true }
+      })
+      if (!existing) {
+        return reply.code(404).send({ error: NOT_FOUND })
+      }
+
       const updated = await prisma.siteConfig.update({
         where: { id },
         data
       })
 
-      if (Array.isArray(actions)) {
-        await prisma.siteConfigVersion
-          .create({
-            data: {
-              siteConfigId: updated.id,
-              actions,
-              sourceType: updated.sourceType,
-              note: 'Manual edit'
-            }
-          })
-          .catch((error) => {
-            broadcastLog(
-              `[#${id}] ⚠️ Не вдалося зберегти версію конфігу: ${error.message}`
-            )
-          })
-      }
-
       return updated
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       if (err.code === 'P2025') {
-        return reply.code(404).send({ error: 'SiteConfig not found' })
+        return reply.code(404).send({ error: NOT_FOUND })
       }
       if (err.code === 'P2002') {
         return reply.code(409).send({
@@ -431,30 +349,33 @@ export default async function siteConfigRoutes (fastify) {
 
   fastify.delete('/site_configs/:id', async (request, reply) => {
     const id = parseId(request.params.id)
-    if (!id) return reply.code(400).send({ error: 'Invalid SiteConfig id' })
+    if (!id) return reply.code(400).send({ error: INVALID_ID })
 
     try {
-      const existing = await prisma.siteConfig.findUnique({
-        where: { id },
+      const existing = await prisma.siteConfig.findFirst({
+        where: { id, deletedAt: null },
         select: { id: true }
       })
       if (!existing) {
-        return reply.code(404).send({ error: 'SiteConfig not found' })
+        return reply.code(404).send({ error: NOT_FOUND })
       }
 
-      // Видаляємо сайт разом з його подіями в одній транзакції.
-      // Це очікувана поведінка кнопки «Видалити» в адмінці: інакше сайт
-      // неможливо прибрати, доки в нього залишаються відскановані події.
-      const [deletedEvents] = await prisma.$transaction([
-        prisma.event.deleteMany({ where: { siteConfigId: id } }),
-        prisma.siteConfig.delete({ where: { id } })
-      ])
+      // М'яке видалення: конфіг ховається зі списків та вибірок, але події
+      // залишаються прив'язаними до нього. Повторне додавання того ж
+      // startUrl через /site_configs/discover відновлює конфіг.
+      await prisma.siteConfig.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          status: 'ARCHIVED'
+        }
+      })
 
-      return { success: true, deletedEvents: deletedEvents.count }
+      return { success: true }
     } catch (err) {
-      console.error(err)
+      fastify.log.error(err)
       if (err.code === 'P2025') {
-        return reply.code(404).send({ error: 'SiteConfig not found' })
+        return reply.code(404).send({ error: NOT_FOUND })
       }
       return reply
         .code(500)

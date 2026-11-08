@@ -13,28 +13,14 @@ model SiteConfig {
   startUrl        String              @unique
   actions         Json
   createdAt       DateTime            @default(now())
-  isActive        Boolean             @default(true)
   updatedAt       DateTime            @updatedAt
   status          String              @default("ACTIVE") // ACTIVE | DRAFT | REVIEW | FAILED
   sourceType      String? // jsonld | microdata | heuristic | llm | manual
-  confidence      Float?
   discoveryReport Json?
-  lastValidatedAt DateTime?
-  lastRunStats    Json?
+  deletedAt       DateTime?
   events          Event[]
-  versions        SiteConfigVersion[]
-}
 
-model SiteConfigVersion {
-  id           Int        @id @default(autoincrement())
-  siteConfigId Int
-  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id], onDelete: Cascade)
-  actions      Json
-  sourceType   String?
-  note         String?
-  createdAt    DateTime   @default(now())
-
-  @@index([siteConfigId])
+  @@index([deletedAt])
 }
 
 model Event {

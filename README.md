@@ -37,25 +37,86 @@ npx prisma migrate deploy
 npm run dev
 ```
 
+## Міграції
+
+Міграція `20261106120000_add_unique_start_url_and_drop_unused_enum` створює
+унікальний індекс на `SiteConfig.startUrl`. На БД, де вже є дублікати,
+спочатку перевірте їх:
+
+```sql
+SELECT "startUrl", COUNT(*)
+FROM "public"."SiteConfig"
+GROUP BY "startUrl"
+HAVING COUNT(*) > 1;
+```
+
+Якщо дублікати знайдені, перенесіть події на найстаріший конфіг і видаліть
+зайві записи:
+
+```sql
+WITH ranked AS (
+  SELECT id, "startUrl",
+         ROW_NUMBER() OVER (
+           PARTITION BY "startUrl" ORDER BY "createdAt", id
+         ) AS rn,
+         FIRST_VALUE(id) OVER (
+           PARTITION BY "startUrl" ORDER BY "createdAt", id
+         ) AS keep_id
+  FROM "public"."SiteConfig"
+), dupes AS (
+  SELECT id, keep_id FROM ranked WHERE rn > 1
+)
+UPDATE "public"."Event" e
+SET "siteConfigId" = d.keep_id
+FROM dupes d
+WHERE e."siteConfigId" = d.id;
+
+WITH ranked AS (
+  SELECT id,
+         ROW_NUMBER() OVER (
+           PARTITION BY "startUrl" ORDER BY "createdAt", id
+         ) AS rn
+  FROM "public"."SiteConfig"
+)
+DELETE FROM "public"."SiteConfig" s
+USING ranked r
+WHERE s.id = r.id AND r.rn > 1;
+```
+
+Після цього застосуйте міграції: `npx prisma migrate deploy`.
+
 ## Авто-дискавері сайтів
 
 Скрапер може сам згенерувати конфіг за одним URL: знаходить картки подій,
 селектори полів, пагінацію та сторінку події, після чого зберігає конфіг у
 статусі `REVIEW`. Активувати сайт потрібно вручну.
 
+Дискавері не перевіряє якість даних: на цьому етапі важливо лише, щоб
+картки та поля взагалі витягувалися, а формат дати може бути будь-яким.
+Спочатку перевіряються структуровані дані (JSON-LD/microdata) і, якщо
+знайдено достатньо карток, Gemini не викликається. Інакше робиться до трьох
+LLM-викликів: вибір картки й полів, виправлення рецепта, якщо карток
+витягнуто замало, та, за потреби, уточнення полів на сторінці події.
+Сканування сайтів LLM не використовує — працює лише зі збереженим рецептом.
+Дати не фільтруються за минулим/майбутнім і не валідуються — це робиться
+пізніше.
+
 ### API
 
 `name` у `POST /site_configs/discover` обов'язковий. Для одного `startUrl`
-створюється лише один `SiteConfig` — повторний виклик оновлює існуючий запис.
+створюється лише один `SiteConfig` (унікальний індекс у БД) — повторний
+виклик оновлює існуючий запис.
 
-Видалення сайту видаляє і всі його події (в одній транзакції) та повертає
-`{ "success": true, "deletedEvents": <кількість> }`. Якщо події потрібно
-зберегти, спочатку перенесіть їх на інший сайт або деактивуйте сайт.
+`DELETE /site_configs/:id` виконує м'яке видалення: конфіг отримує
+`deletedAt`, статус `ARCHIVED` і `isActive = false`, зникає зі списків та
+вибірок, але всі його події залишаються в БД. Ендпоінт повертає
+`{ "success": true }`. Повторне додавання того ж `startUrl` через
+`POST /site_configs/discover` відновлює конфіг (`deletedAt = null`).
 
 ### UI
 
 У адмінці: **Site configs → Додати сайт за URL** (`/site-configs/discover`).
-Майстер показує живий лог, валідацію, превʼю подій і кнопку активації.
+Майстер показує живий лог і кнопку активації.
 
 ### Формат нового рецепта
 
@@ -67,12 +128,11 @@ npm run dev
 - `extractDetails` — `{ source: "auto", fields }` для дозаповнення з детейла
 - `seedUrls` — `{ urls: [] }` додаткові сторінки (наприклад, «ці вихідні»)
 
-Старі конфіги з `extractList` / плоскими `extractDetails` і далі працюють.
+Підтримується лише цей формат. Конфіги з `extractList` / плоскими
+`extractDetails` потрібно перегенерувати через дискавері.
 
 ## Скрипти
 
 ```bash
 npm run lint          # ESLint
-npm test              # node:test
-npm run backfill:unix # перерахувати unixTime для наявних подій
 ```
