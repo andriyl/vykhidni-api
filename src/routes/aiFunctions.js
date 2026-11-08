@@ -2,9 +2,17 @@ import { model } from '../gemini.js'
 import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
 import { prisma } from '../db/prisma.js'
 
+let validationRunning = false
+
 export default async function aiFunctionsRoutes (fastify) {
   fastify.post('/validate-by-ai', async (request, reply) => {
+    if (validationRunning) {
+      return reply.code(409).send({ error: 'AI-валідація вже виконується' })
+    }
+
+    validationRunning = true
     broadcastLog('🤖 Починаємо валідацію через AI...')
+
     try {
       const events = await prisma.event.findMany({
         where: { status: 'DRAFT' }
@@ -44,19 +52,28 @@ export default async function aiFunctionsRoutes (fastify) {
           try {
             parsed = JSON.parse(cleaned)
           } catch {
-            console.warn('⚠️ AI повернув невалідний JSON:', text)
+            fastify.log.warn('AI повернув невалідний JSON:', text)
             continue
           }
 
           const dataToUpdate = {
-            ...parsed,
+            title: parsed.title ?? ev.title,
+            date: parsed.date ?? ev.date,
+            time: parsed.time ?? ev.time,
+            location: parsed.location ?? ev.location,
+            description: parsed.description ?? ev.description,
+            image: parsed.image ?? ev.image,
+            category: parsed.category ?? ev.category,
+            isForKids: parsed.isForKids ?? ev.isForKids,
             status: 'APPROVED_BY_AI'
           }
 
           if (ev.status === 'DRAFT') {
             const coords = await getCoordinates(parsed.location)
             dataToUpdate.unixTime = toUnix(parsed.date, parsed.time) || null
-            dataToUpdate.coordinates = coords ? `${coords.lat},${coords.lon}` : null
+            dataToUpdate.coordinates = coords
+              ? `${coords.lat},${coords.lon}`
+              : null
           }
 
           const updated = await prisma.event.update({
@@ -64,13 +81,13 @@ export default async function aiFunctionsRoutes (fastify) {
             data: dataToUpdate
           })
 
-          console.log(`✅ Оновлено подію: ${updated.title}`)
+          broadcastLog(`✅ Оновлено подію: ${updated.title}`)
           broadcastLog(`✅ Оновлено подію: ${updated.title}`)
           results.push(updated)
 
           await new Promise(resolve => setTimeout(resolve, 2000))
         } catch (innerErr) {
-          console.error('❌ Помилка при обробці події:', ev.id, innerErr.message)
+          fastify.log.error('Помилка при обробці події:', ev.id, innerErr.message)
           broadcastLog(`❌ Помилка при обробці події ${ev.id}: ${innerErr.message}`)
 
           try {
@@ -92,9 +109,13 @@ export default async function aiFunctionsRoutes (fastify) {
         updated: results
       }
     } catch (err) {
-      console.error('🔥 Глобальна помилка:', err)
+      fastify.log.error('Глобальна помилка:', err)
       broadcastLog(`🔥 Глобальна помилка: ${err.message}`)
-      reply.status(500).send({ error: 'Помилка при валідації подій' })
+      return reply
+        .code(500)
+        .send({ error: 'Помилка при валідації подій' })
+    } finally {
+      validationRunning = false
     }
   })
 }

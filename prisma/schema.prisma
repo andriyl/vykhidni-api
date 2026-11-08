@@ -8,18 +8,23 @@ datasource db {
 }
 
 model SiteConfig {
-  id          Int     @id @default(autoincrement())
-  name        String
-  startUrl    String
-  actions     Json
-  createdAt   DateTime @default(now())
-  isActive    Boolean  @default(true)
-  updatedAt   DateTime @updatedAt
-  events      Event[]
+  id              Int                 @id @default(autoincrement())
+  name            String
+  startUrl        String              @unique
+  actions         Json
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  status          String              @default("ACTIVE") // ACTIVE | DRAFT | REVIEW | FAILED
+  sourceType      String? // jsonld | microdata | heuristic | llm | manual
+  discoveryReport Json?
+  deletedAt       DateTime?
+  events          Event[]
+
+  @@index([deletedAt])
 }
 
 model Event {
-  id           Int       @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   title        String
   date         String?
   time         String?
@@ -28,19 +33,12 @@ model Event {
   image        String?
   unixTime     Int?
   coordinates  String?
-  url          String    @unique
-  status       String    @default("DRAFT")
-  createdAt    DateTime  @default(now())
+  url          String     @unique
+  status       String     @default("DRAFT")
+  createdAt    DateTime   @default(now())
   siteConfigId Int
   siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [id])
   category     String?
   isForKids    Boolean?
-  aiProcessed  Boolean   @default(false)
-}
-
-enum EventStatus {
-  DRAFT
-  APPROVED
-  APPROVED_BY_AI
-  REJECTED
+  aiProcessed  Boolean    @default(false)
 }

@@ -11,9 +11,11 @@ import { addLogClient, broadcastLog } from './utils.js'
 const fastify = Fastify({ logger: true })
 
 const defaultOrigins = [
+  'http://localhost:4173',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
+  'http://127.0.0.1:4173',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175'
@@ -54,7 +56,6 @@ async function runScan (reply, request) {
   }
 }
 
-fastify.get('/scan', async (request, reply) => runScan(reply, request))
 fastify.post('/scan', async (request, reply) => runScan(reply, request))
 
 const port = Number(process.env.PORT) || 3000
