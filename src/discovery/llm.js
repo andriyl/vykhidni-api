@@ -102,18 +102,6 @@ function normalizeRecipe (parsed) {
   return { item, link, fields, pagination }
 }
 
-function formatCandidates (candidates) {
-  return candidates
-    .map(
-      (candidate, index) =>
-        `--- КАНДИДАТ ${index + 1} ---\n` +
-        `selector: ${candidate.selector}\n` +
-        `count: ${candidate.count}\n` +
-        `html: ${candidate.html}`
-    )
-    .join('\n\n')
-}
-
 async function callModel (prompt) {
   const maxAttempts = 3
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
@@ -140,21 +128,6 @@ async function callModel (prompt) {
   }
   return { data: null, usage: null }
 }
-
-const RECIPE_RULES = `
-Правила:
-- "item" мусить бути ТОЧНО одним із наданих selector кандидатів. Не вигадуй новий.
-- "link" — селектор посилання всередині картки.
-- "fields" — CSS-селектори відносно кореня картки. Для кожного поля 1–2 селектори.
-- Дата/час: шукай itemprop="startDate", time[datetime], meta[content].
-- Картинка: [itemprop="image"], meta[content], img.
-- Не вигадуй селекторів, яких немає у фрагменті HTML.
-- "pagination" вибирай лише з наданих варіантів або {"mode":"none"}.
-`
-
-const RECIPE_FIELDS =
-  '"item":"...","link":["..."],"fields":{"title":["..."],"date":["..."],"time":["..."],"image":["..."],"location":["..."],"description":["..."],"price":["..."]}'
-
 /**
  * Ask Gemini for field selectors on a detail page. Returns { data, usage } where data.fields exists.
  */
