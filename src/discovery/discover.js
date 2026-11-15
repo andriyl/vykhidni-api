@@ -2,7 +2,8 @@ import { chromium } from 'playwright'
 import { MICRODATA_ITEM_SELECTOR, probeListing } from './probe.js'
 import {
   extractDetail,
-  extractItems
+  extractItems,
+  workingFields
 } from '../scanner/extract.js'
 import {
   proposeRecipe,
@@ -15,10 +16,56 @@ import {
   safeGoto,
   USER_AGENT
 } from '../scanner/browser.js'
+import { validateEvent, parseDateParts } from '../utils.js'
 
 const MAX_LLM_CALLS = 3
 const MIN_REPAIR_ITEMS = 3
+const MIN_DETAIL_DESCRIPTION = 200
 const DETAIL_FIELDS = ['title', 'date', 'location', 'image', 'description']
+
+// A description that is missing, tiny or just repeats the title is not a
+// usable event description even though the field is non-empty.
+function weakDescription (event) {
+  const text = (event?.description || '').trim()
+  return (
+    !text ||
+    text.length < MIN_DETAIL_DESCRIPTION ||
+    text === (event?.title || '').trim()
+  )
+}
+
+const FIELD_LABELS = {
+  title: 'назва',
+  date: 'дата',
+  time: 'час',
+  location: 'місце',
+  description: 'опис',
+  image: 'картинка',
+  price: 'ціна'
+}
+
+// A value that may be written to the site config: no markup, right shape.
+function saneValue (field, value) {
+  const text = (value || '').trim()
+  if (!text) return false
+  if (field === 'date') {
+    return Boolean(parseDateParts(text)) || /\d{1,2}\s*[./-]\s*\d{1,2}/.test(text)
+  }
+  if (field === 'time') {
+    return /^([01]\d|2[0-3])[:.]\d{2}$/.test(text) || /T\d{2}:\d{2}/.test(text)
+  }
+  if (field === 'title') {
+    return text.length >= 3 && text.length <= 300 && /[a-zа-яіїєґ]/i.test(text)
+  }
+  if (field === 'image') return /^(https?:|data:|\/)/.test(text)
+  if (field === 'description') {
+    return (
+      text.length >= 40 &&
+      !/<(?:script|iframe|div|html|body|head|p|span|img)\b/i.test(text)
+    )
+  }
+  return text.length > 1
+}
 
 export function normalizeStartUrl (value) {
   if (!value || typeof value !== 'string') {
@@ -170,9 +217,14 @@ function buildActions ({
 async function detailSnippet (page) {
   try {
     return await page.evaluate(() => {
+      // The first container that is likely the event itself; body is last.
       const root =
         document.querySelector('article') ||
         document.querySelector('main') ||
+        document.querySelector('[role="main"]') ||
+        document.querySelector('[class*="event-page"]') ||
+        document.querySelector('[class*="event-detail"]') ||
+        document.querySelector('[class*="single-page"]') ||
         document.body
       return root ? root.innerHTML : ''
     })
@@ -275,22 +327,46 @@ export async function discoverSite (
     }
 
     let preview = await extractItems(page, recipe)
+    log(`📦 Знайдено подій: ${preview.length}`)
 
     // One repair call when extraction yields too few cards. Acceptance is
     // based only on the number of extracted events, not on field quality.
     const chosen =
       candidates.find((candidate) => candidate.selector === recipe.item) ||
       candidates[0]
-    const tooFew =
-      preview.length === 0 ||
-      (chosen?.count >= MIN_REPAIR_ITEMS && preview.length < MIN_REPAIR_ITEMS)
+    let repairAttempts = 0
+    while (useLLM && repairAttempts < MAX_LLM_CALLS) {
+      const tooFew =
+        preview.length === 0 ||
+        (chosen?.count >= MIN_REPAIR_ITEMS && preview.length < MIN_REPAIR_ITEMS)
+      const sampleEvent = preview[0] ? { ...preview[0] } : null
+      const sampleValidation = sampleEvent ? validateEvent(sampleEvent) : null
+      const shouldRepair = tooFew || (sampleValidation && !sampleValidation.valid)
 
-    if (tooFew && useLLM && llmCalls < MAX_LLM_CALLS) {
-      log('🤖 Уточнюємо селектори за результатами перевірки...')
+      if (!shouldRepair) break
+
+      repairAttempts += 1
+      const failures = []
+      if (sampleValidation && !sampleValidation.valid) {
+        const normalized = sampleValidation.normalized
+        if (!normalized.title) failures.push('title')
+        if (!normalized.url) failures.push('url')
+        if (!parseDateParts(normalized.date)) failures.push('date')
+        if (normalized.time && !/^([01]\d|2[0-3])[:.][0-5]\d$/.test(normalized.time)) {
+          failures.push('time')
+        }
+        if (normalized.description && normalized.description.length > 500) failures.push('description')
+      }
+
+      log(
+        `🤖 Уточнюємо селектори списку (${
+          (failures.length ? failures : ['item']).join(', ')
+        })...`
+      )
       const { data, usage } = await repairRecipe({
         cardHtml: pruneHtml(chosen?.html || '', 2200),
         sample: preview.slice(0, 3),
-        failures: ['item', 'title', 'date'],
+        failures: failures.length ? failures : ['item', 'title', 'date'],
         current: {
           item: recipe.item,
           link: recipe.link,
@@ -303,7 +379,8 @@ export async function discoverSite (
       if (data) {
         const repaired = await mergeRecipe(recipe, data, page)
         const repairedPreview = await extractItems(page, repaired)
-        if (repairedPreview.length > preview.length) {
+        const improved = repairedPreview.length > preview.length
+        if (improved) {
           recipe = repaired
           preview = repairedPreview
           if (repaired.item !== MICRODATA_ITEM_SELECTOR) sourceType = 'llm'
@@ -335,25 +412,99 @@ export async function discoverSite (
         )
         detail.structured = first.structured
         let detailEvent = first.event
-        const missing = DETAIL_FIELDS.filter((field) => !detailEvent?.[field])
+        // A value of the wrong shape (a date as the title, page chrome as the
+        // time) counts as missing, so the AI is asked to replace it.
+        const missingFields = () =>
+          DETAIL_FIELDS.filter((field) => !saneValue(field, detailEvent?.[field]))
+        let missing = missingFields()
+        let rejected = {}
+        let attempts = 0
 
-        if (useLLM && missing.length && llmCalls < MAX_LLM_CALLS) {
-          log('🤖 Уточнюємо поля сторінки події через Gemini...')
+        // The listing card already holds a good value for a field: asking the
+        // AI for it again costs a request and can only make it worse.
+        const listingValue = (field) => preview[0]?.[field]
+        const askable = (field) =>
+          field === 'description' || !saneValue(field, listingValue(field))
+
+        // Two AI attempts at most: the first one usually fixes the page, the
+        // second gets the selectors that matched nothing as feedback.
+        while (useLLM && attempts < 2 && llmCalls < MAX_LLM_CALLS) {
+          const refineFields = (
+            weakDescription(detailEvent) && !missing.includes('description')
+              ? [...missing, 'description']
+              : missing
+          ).filter(askable)
+          if (!refineFields.length) break
+
+          log(
+            `🤖 Запит в AI за деталями: ${refineFields
+              .map((field) => FIELD_LABELS[field] || field)
+              .join(', ')}`
+          )
           const { data, usage } = await refineDetail({
             detailHtml: pruneHtml(await detailSnippet(detailPage), 6000),
-            currentFields: {},
-            missingFields: missing
+            currentFields: detail.fields,
+            missingFields: refineFields,
+            rejectedFields: rejected
           })
           llmCalls += 1
           llmTokens += usage?.totalTokenCount || 0
+          attempts += 1
+          if (!data?.fields) break
 
-          if (data?.fields) {
-            detail.fields = data.fields
-            detailEvent = await extractDetail(detailPage, {
-              source: 'auto',
-              fields: data.fields
-            })
+          rejected = {}
+          const verified = await workingFields(detailPage, data.fields)
+          // Only selectors for the fields we asked about are merged: the model
+          // likes to add extras (an organizer as the location) on its own.
+          const asked = {}
+          for (const field of refineFields) {
+            if (verified[field]) asked[field] = verified[field]
           }
+          if (!Object.keys(asked).length) continue
+
+          for (const [field, chain] of Object.entries(data.fields)) {
+            const ok = new Set(asked[field] || [])
+            const failed = chain.filter((selector) => !ok.has(selector))
+            if (failed.length) rejected[field] = failed
+          }
+
+          const merged = { ...detail.fields, ...asked }
+          const refined = await extractDetail(detailPage, {
+            source: 'auto',
+            fields: merged
+          })
+          // Drop selectors that match an element but return a wrong value.
+          for (const field of Object.keys(asked)) {
+            if (!saneValue(field, refined[field])) delete merged[field]
+          }
+          detail.fields = merged
+          // Only the requested fields are replaced, and only with sane values:
+          // a guessed selector must never overwrite data that is already good.
+          const before = JSON.stringify(detailEvent)
+          for (const field of refineFields) {
+            if (saneValue(field, refined[field])) detailEvent[field] = refined[field]
+          }
+          missing = missingFields()
+          // Nothing changed, so another identical request would not help.
+          if (JSON.stringify(detailEvent) === before) break
+        }
+
+        // Never report a value that the preview would reject anyway.
+        for (const field of DETAIL_FIELDS) {
+          if (!saneValue(field, detailEvent?.[field])) delete detailEvent[field]
+        }
+        missing = missingFields()
+
+        // Only warn about fields that the listing card does not provide either.
+        const stillMissing = missing.filter(
+          (field) => !saneValue(field, listingValue(field))
+        )
+        if (stillMissing.length) {
+          log(
+            `⚠️ Не знайдено: ${stillMissing
+              .map((field) => FIELD_LABELS[field] || field)
+              .join(', ')}`
+          )
         }
 
         detail.event = detailEvent
@@ -368,18 +519,25 @@ export async function discoverSite (
 
     const previewEvent = preview[0] ? { ...preview[0] } : null
     if (previewEvent && detail.event) {
-      if (detail.event.date && !previewEvent.date) {
-        previewEvent.date = detail.event.date
-      }
-      for (const key of ['title', 'time', 'location', 'image']) {
-        if (!previewEvent[key] && detail.event[key]) previewEvent[key] = detail.event[key]
-      }
-      if (
-        detail.event.description &&
-        (!previewEvent.description ||
-          detail.event.description.length > previewEvent.description.length)
-      ) {
+      // The listing card is authoritative for date/time/place/price: a detail
+      // page may show related events first. Title and description come from
+      // the detail page, which is the event itself.
+      if (saneValue('title', detail.event.title)) previewEvent.title = detail.event.title
+      if (saneValue('description', detail.event.description)) {
         previewEvent.description = detail.event.description
+      }
+      for (const key of ['date', 'time', 'location', 'image', 'price']) {
+        if (!previewEvent[key] && saneValue(key, detail.event[key])) {
+          previewEvent[key] = detail.event[key]
+        }
+      }
+      // A listing date without a year ("26/11") is worse than the full one.
+      if (
+        saneValue('date', detail.event.date) &&
+        !/\d{4}/.test(previewEvent.date || '') &&
+        /\d{4}/.test(detail.event.date || '')
+      ) {
+        previewEvent.date = detail.event.date
       }
     }
 
@@ -400,6 +558,8 @@ export async function discoverSite (
         (candidate) => candidate.selector === recipe.item
       ) || null
 
+    log(`✅ Дискавері завершено: ${preview.length} подій`)
+
     const report = {
       status: 'done',
       startedAt: startedAt.toISOString(),
@@ -417,7 +577,12 @@ export async function discoverSite (
         .map(candidateReport),
       chosenCandidate: candidateReport(chosenCandidate),
       pagination,
-      detail,
+      detail: {
+        url: detail.url,
+        source: detail.source,
+        fields: detail.fields,
+        structured: detail.structured
+      },
       preview: previewEvent,
       warnings: [...new Set(warnings)],
       llmCalls,

@@ -1,3 +1,5 @@
+import { MAX_DESCRIPTION, validateEvent } from '../utils.js'
+
 export const EXTRACTED_FIELDS = [
   'title',
   'date',
@@ -57,7 +59,12 @@ const FALLBACK_FIELDS = {
 
 const GENERIC_DETAIL_FIELDS = {
   title: ['h1', 'meta[property="og:title"]'],
-  date: ['[itemprop="startDate"]', 'time[datetime]', 'time'],
+  date: [
+    '[itemprop="startDate"]',
+    'time[datetime]',
+    'time',
+    '[class*="date"]'
+  ],
   time: ['[itemprop="startDate"]', 'time[datetime]', 'time'],
   location: [
     '[itemprop="location"]',
@@ -69,8 +76,11 @@ const GENERIC_DETAIL_FIELDS = {
   description: [
     '[itemprop="description"]',
     'meta[property="og:description"]',
-    'article',
-    'main'
+    '[class*="event-content"]',
+    '[class*="event-description"]',
+    '[class*="description"]',
+    '[class*="desc"]',
+    'article p'
   ],
   image: [
     '[itemprop="image"]',
@@ -137,8 +147,24 @@ export function normalizeEvent (raw, pageUrl) {
     out[key] = typeof value === 'string' ? value : ''
   }
 
+  // Many sites put a full ISO datetime or a date range into the time field;
+  // keep HH:mm and drop anything that is not a clock time (time is optional).
+  const iso = out.time.match(/T(\d{1,2}):(\d{2})/)
+  const plain = out.time.match(/^(\d{1,2})[:.](\d{2})(?::\d{2})?$/)
+  if (iso) out.time = `${iso[1].padStart(2, '0')}:${iso[2]}`
+  else if (plain) out.time = `${plain[1].padStart(2, '0')}:${plain[2]}`
+  else out.time = ''
+
   out.url = normalizeUrl(raw?.url, pageUrl)
   out.image = out.image ? normalizeUrl(out.image, pageUrl) : ''
+
+  // A page may use the date as its only <h1>; that is not a title.
+  if (!/[a-zа-яіїєґ]/i.test(out.title)) out.title = ''
+
+  // A hidden element can carry escaped page markup; never keep that as text.
+  if (/<(?:script|iframe|div|html|body|head|p|span|img)\b/i.test(out.description)) {
+    out.description = ''
+  }
 
   return out
 }
@@ -155,7 +181,11 @@ export function overrideWith (target, source) {
  * Витягнути список подій з лістингу.
  * Повертає нормалізовані події з полями title/date/time/location/description/image/url.
  */
-export async function extractItems (page, recipe = {}) {
+export async function extractItems (
+  page,
+  recipe = {},
+  { validate = true, allowDocument = false } = {}
+) {
   const item = recipe.item || recipe.selector
   if (!item) return []
 
@@ -165,11 +195,26 @@ export async function extractItems (page, recipe = {}) {
   const fields = recipe.fields || {}
   const source = recipe.source || 'fields'
   const requireUrl = recipe.requireUrl !== false
+  const fallbacks = recipe.fallbacks || FALLBACK_FIELDS
+  // Detail extraction is not validated, so only listing rows get a length cap.
+  const descriptionMax = validate ? MAX_DESCRIPTION : 0
 
   const rows = await page.evaluate(
-    ({ item, linkChain, fields, fallbacks, source }) => {
+    ({ item, linkChain, fields, fallbacks, descriptionMax, source, allowDocument }) => {
       const clean = (value) =>
         value ? String(value).replace(/\s+/g, ' ').trim() : ''
+
+      // <meta>/<link> live in <head>; a detail page is rooted at <body>.
+      const queryAll = (root, selector) => {
+        try {
+          const nodes = root.querySelectorAll(selector)
+          if (nodes.length || root === document || !allowDocument) return nodes
+          if (!/^(meta|link)\b/.test(selector)) return nodes
+          return document.querySelectorAll(selector)
+        } catch {
+          return []
+        }
+      }
 
       const chainOf = (value) => {
         if (!value) return []
@@ -232,19 +277,14 @@ export async function extractItems (page, recipe = {}) {
           clean(el.getAttribute('content')) ||
           clean(el.getAttribute('datetime')) ||
           clean(el.getAttribute('value')) ||
-          clean(el.textContent)
+          clean(el.innerText || el.textContent)
         )
       }
 
       const pick = (root, chain, field) => {
         for (const selector of chainOf(chain)) {
           if (!selector) continue
-          let nodes
-          try {
-            nodes = [...root.querySelectorAll(selector)]
-          } catch {
-            continue
-          }
+          const nodes = [...queryAll(root, selector)]
           const values = nodes
             .map((node) => readValue(node, field))
             .filter((value) => value && value.length > 1)
@@ -266,6 +306,42 @@ export async function extractItems (page, recipe = {}) {
           return values[0]
         }
         return ''
+      }
+
+      // Опис збираємо з УСІХ селекторів рецепта: LLM підбирає кілька блоків
+      // (текст, деталі, ціна, вік), які разом дають логічний опис події.
+      const collect = (root, chain, field, max) => {
+        const values = []
+        for (const selector of chainOf(chain)) {
+          if (!selector) continue
+          for (const node of queryAll(root, selector)) {
+            const value = readValue(node, field)
+            if (value && value.length > 1) values.push(value)
+          }
+        }
+        const unique = [...new Set(values)]
+        // If one selected block contains another, they are the same text twice:
+        // keep the child when it is most of the wrapper (the wrapper adds page
+        // chrome), keep the wrapper when the child is only a small fragment.
+        const dropped = new Set()
+        for (const value of unique) {
+          for (const other of unique) {
+            if (
+              other === value ||
+              other.length <= value.length ||
+              !other.includes(value)
+            ) {
+              continue
+            }
+            dropped.add(value.length >= other.length * 0.5 ? other : value)
+          }
+        }
+        const kept = unique.filter((value) => !dropped.has(value))
+        const joined = kept.join('\n\n')
+        // Listing rows are validated against MAX_DESCRIPTION: a joined blob that
+        // long would drop the whole event, so keep the first block instead.
+        if (max && joined.length > max) return kept[0] || ''
+        return joined
       }
 
       const microdata = (root) => {
@@ -304,11 +380,12 @@ export async function extractItems (page, recipe = {}) {
         // Recipe selectors first, then generic fallbacks for still-empty fields.
         for (const [field, chain] of Object.entries(fallbacks)) {
           if (row[field]) continue
-          const value = pick(
-            root,
-            [...chainOf(fields[field]), ...chain],
-            field
-          )
+          let value = field === 'description'
+            ? collect(root, fields[field], field, descriptionMax)
+            : ''
+          if (!value) {
+            value = pick(root, [...chainOf(fields[field]), ...chain], field)
+          }
           if (value) row[field] = value
         }
 
@@ -330,12 +407,13 @@ export async function extractItems (page, recipe = {}) {
         return row
       })
     },
-    { item, linkChain, fields, fallbacks: FALLBACK_FIELDS, source }
+    { item, linkChain, fields, fallbacks, descriptionMax, source, allowDocument }
   )
 
   return rows
     .map((row) => normalizeEvent(row, page.url()))
     .filter((row) => !requireUrl || row.url)
+    .filter((row) => validate ? validateEvent(row).valid : true)
 }
 
 /**
@@ -469,55 +547,62 @@ export async function extractMicrodata (page) {
 }
 
 /**
+ * Does a structured-data title describe the page's own event? Related-event
+ * blocks repeat elsewhere on the page, so a low word overlap means "not ours".
+ */
+export function sameEventTitle (title, heading) {
+  const words = (value) =>
+    String(value || '')
+      .toLowerCase()
+      .match(/[a-zа-яіїєґ0-9]{3,}/g) || []
+  const own = words(title)
+  if (!own.length) return true
+  const page = new Set(words(heading))
+  if (!page.size) return true
+  const hits = own.filter((word) => page.has(word)).length
+  return hits / own.length >= 0.6
+}
+
+/**
  * Витягнути подію зі сторінки деталей. Generic-поля з усього body, потім
  * structured data (JSON-LD/microdata) перекриває їх.
  */
-export async function extractDetail (
-  page,
-  recipe = {},
-  { withMeta = false } = {}
-) {
-  const fields = { ...GENERIC_DETAIL_FIELDS, ...(recipe.fields || {}) }
-  const [generic] = await extractItems(page, {
-    item: 'body',
-    fields,
-    source: recipe.source || 'fields',
-    requireUrl: false
-  })
+export async function extractDetail (page, recipe = {}, { withMeta = false } = {}) {
+  const [generic] = await extractItems(
+    page,
+    {
+      item: 'body',
+      fields: recipe.fields || {},
+      fallbacks: GENERIC_DETAIL_FIELDS,
+      source: recipe.source || 'fields',
+      requireUrl: false
+    },
+    { validate: false, allowDocument: true }
+  )
 
   let event = generic || {}
   const jsonLd = await extractJsonLd(page)
   const microdata = jsonLd ? null : await extractMicrodata(page)
-  const structured = jsonLd || microdata
+  let structured = jsonLd || microdata
+
+  // Related-event widgets carry their own JSON-LD/microdata; only trust the
+  // structured block when its title is the page's own event.
+  if (structured?.title) {
+    const heading = await page.evaluate(() => {
+      const clean = (v) => (v ? String(v).replace(/\s+/g, ' ').trim() : '')
+      const h1 = document.querySelector('h1')
+      const og = document.querySelector('meta[property="og:title"]')
+      return [clean(h1?.innerText), clean(og?.getAttribute('content')), clean(document.title)]
+        .filter(Boolean)
+        .join(' | ')
+    })
+    if (!sameEventTitle(structured.title, heading)) structured = null
+  }
+
   if (structured) event = overrideWith(event, structured)
 
   const normalized = normalizeEvent(event, page.url())
   normalized.url = normalizeUrl(page.url())
-
-  // Prefer the full visible text of the event page over the short teaser
-  // that most sites put in og:description / itemprop="description".
-  try {
-    const fullText = await page.evaluate(() => {
-      const root =
-        document.querySelector('main, article, [role="main"]') ||
-        document.body
-      const clone = root.cloneNode(true)
-      clone
-        .querySelectorAll('script, style, nav, header, footer, aside, form, button, [role="navigation"]')
-        .forEach((node) => node.remove())
-      return (clone.innerText || clone.textContent || '').trim()
-    })
-    if (fullText && fullText.length > 80) {
-      if (
-        !normalized.description ||
-        fullText.length > (normalized.description || '').length
-      ) {
-        normalized.description = fullText
-      }
-    }
-  } catch {
-    // keep the description we already have
-  }
 
   if (!withMeta) return normalized
 
@@ -529,4 +614,57 @@ export async function extractDetail (
       date: Boolean(structured?.date)
     }
   }
+}
+
+/**
+ * Keep only selectors that resolve on the page and return a usable value.
+ * LLM guesses that match nothing must never reach the saved site config.
+ */
+export async function workingFields (page, fields = {}) {
+  return page.evaluate((fields) => {
+    const clean = (value) =>
+      value ? String(value).replace(/\s+/g, ' ').trim() : ''
+    const markup = /<(?:script|iframe|div|html|body|head|p|span|img)\b/i
+
+    const valueOf = (el, field) => {
+      if (field === 'image') {
+        const img = el.tagName === 'IMG' ? el : el.querySelector?.('img')
+        if (img) {
+          return clean(
+            img.currentSrc ||
+              img.getAttribute('src') ||
+              img.getAttribute('data-src')
+          )
+        }
+        return clean(el.getAttribute('content'))
+      }
+      return (
+        clean(el.getAttribute('content')) ||
+        clean(el.getAttribute('datetime')) ||
+        clean(el.getAttribute('value')) ||
+        clean(el.innerText || '')
+      )
+    }
+
+    const out = {}
+    for (const [field, chain] of Object.entries(fields)) {
+      const working = []
+      for (const selector of Array.isArray(chain) ? chain : [chain]) {
+        if (!selector) continue
+        let nodes
+        try {
+          nodes = [...document.querySelectorAll(selector)]
+        } catch {
+          continue
+        }
+        const ok = nodes.some((node) => {
+          const value = valueOf(node, field)
+          return value.length > 1 && !markup.test(value)
+        })
+        if (ok) working.push(selector)
+      }
+      if (working.length) out[field] = working
+    }
+    return out
+  }, fields)
 }
