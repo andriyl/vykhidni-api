@@ -4,7 +4,6 @@ import { prisma } from '../db/prisma.js'
 const EVENT_STATUSES = new Set([
   'DRAFT',
   'APPROVED',
-  'APPROVED_BY_AI',
   'REJECTED'
 ])
 
@@ -103,7 +102,7 @@ export default async function eventRoutes (fastify) {
     }
   })
 
-  // POST /events
+  // PATCH /events/:id
   fastify.patch('/events/:id', async (request, reply) => {
     const eventId = Number.parseInt(request.params.id, 10)
     if (!Number.isInteger(eventId)) {

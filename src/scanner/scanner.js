@@ -1,6 +1,6 @@
 import { PlaywrightCrawler, RequestQueue, log } from 'crawlee'
 import { prisma } from '../db/prisma.js'
-import { broadcastLog } from '../utils.js'
+import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
 import { clickLoadMore, USER_AGENT } from './browser.js'
 import { extractDetail, extractItems, getAction, normalizeActions } from './extract.js'
 
@@ -50,7 +50,7 @@ export async function stopScan (reason = 'manual') {
 }
 
 const DEFAULT_MAX_PAGES = 5
-const DEFAULT_HYDRATE_LIMIT = 40
+const DEFAULT_HYDRATE_LIMIT = 100
 
 function pageNumber (url, param = 'page') {
   const escaped = param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -58,13 +58,8 @@ function pageNumber (url, param = 'page') {
   return match ? Number(match[1]) : 0
 }
 
-function needsDetail (event) {
-  return !event.description || !event.location
-}
-
 async function hydrateEvent (page, event, detailAction) {
-  if (!detailAction || !event.url) return event
-  if (event.description && event.location) return event
+  if (!detailAction || !event.url) return true
 
   const detailPage = await page.context().newPage()
   try {
@@ -77,13 +72,21 @@ async function hydrateEvent (page, event, detailAction) {
 
     for (const key of ['title', 'date', 'time', 'location', 'description', 'image']) {
       if (!event[key] && detail[key]) event[key] = detail[key]
+      if (
+        (key === 'description' || key === 'location') &&
+        detail[key] &&
+        detail[key].length > (event[key] || '').length
+      ) {
+        event[key] = detail[key]
+      }
     }
+    return true
   } catch (error) {
     log.warning(`Detail hydration failed for ${event.url}: ${error.message}`)
+    return false
   } finally {
     await detailPage.close().catch(() => {})
   }
-  return event
 }
 
 async function saveEvent (site, event, stats, seenUrls) {
@@ -102,7 +105,7 @@ async function saveEvent (site, event, stats, seenUrls) {
     .catch(() => null)
   if (
     existing &&
-    (existing.status === 'APPROVED' || existing.status === 'APPROVED_BY_AI')
+    existing.status === 'APPROVED'
   ) {
     seenUrls.add(event.url)
     stats.skipped += 1
@@ -117,6 +120,8 @@ async function saveEvent (site, event, stats, seenUrls) {
       return false
     }
 
+    const coords = await getCoordinates(event.location)
+
     await prisma.event.create({
       data: {
         title: event.title || event.url,
@@ -126,7 +131,9 @@ async function saveEvent (site, event, stats, seenUrls) {
         description: event.description || null,
         image: event.image || null,
         url: event.url,
-        siteConfigId: site.id
+        siteConfigId: site.id,
+        unixTime: toUnix(event.date, event.time) || null,
+        coordinates: coords ? `${coords.lat},${coords.lon}` : null
       }
     })
     seenUrls.add(event.url)
@@ -219,6 +226,7 @@ export async function scanSites ({ siteId } = {}) {
       const newEvents = []
 
       let hydrateBudget = DEFAULT_HYDRATE_LIMIT
+      let hydrateFailures = 0
 
       const queueName = `site-${site.id}-${Date.now()}`
       const requestQueue = await RequestQueue.open(queueName)
@@ -231,10 +239,12 @@ export async function scanSites ({ siteId } = {}) {
             stats.skipped += 1
             continue
           }
-          const needsDesc = !event.description
-          if (needsDesc || (hydrateBudget > 0 && needsDetail(event))) {
-            await hydrateEvent(page, event, extractDetailsAction)
-            if (!needsDesc) hydrateBudget -= 1
+          // Stop hydrating after repeated failures: a slow site otherwise eats
+          // the request handler timeout and its pagination pages never load.
+          if (hydrateBudget > 0 && hydrateFailures < 3) {
+            const hydrated = await hydrateEvent(page, event, extractDetailsAction)
+            hydrateBudget -= 1
+            if (!hydrated) hydrateFailures += 1
           }
           if (await saveEvent(site, event, stats, seenUrls)) {
             newEvents.push(event)
