@@ -3,6 +3,7 @@ import { prisma } from '../db/prisma.js'
 import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
 import { clickLoadMore, USER_AGENT } from './browser.js'
 import { extractDetail, extractItems, getAction, normalizeActions } from './extract.js'
+import { classifyEventsForKids } from '../discovery/llm.js'
 
 const activeScanState = {
   running: false,
@@ -359,6 +360,44 @@ export async function scanSites ({ siteId } = {}) {
         }
       } finally {
         await requestQueue.drop().catch(() => {})
+      }
+
+      // Класифікація: чи події для дітей (один запит на весь батч)
+      try {
+        const toClassify = await prisma.event.findMany({
+          where: { siteConfigId: site.id, status: 'DRAFT', aiProcessed: false },
+          select: { url: true, title: true, date: true, location: true, description: true }
+        })
+        if (toClassify.length) {
+          const results = await classifyEventsForKids(toClassify)
+          if (Array.isArray(results) && results.length === toClassify.length) {
+            let rejected = 0
+            for (let i = 0; i < toClassify.length; i += 1) {
+              const isKid = results[i]
+              await prisma.event.updateMany({
+                where: { url: toClassify[i].url },
+                data: {
+                  isForKids: isKid,
+                  aiProcessed: true,
+                  ...(isKid ? {} : { status: 'REJECTED' })
+                }
+              })
+              if (!isKid) rejected += 1
+            }
+            if (rejected) {
+              log.info(`🚫 ${site.name}: відхилено ${rejected} не-дитячих подій`)
+              broadcastLog(
+                `🚫 ${site.name}: відхилено ${rejected} не-дитячих подій`
+              )
+            }
+          } else {
+            log.warning(
+              `⚠️ ${site.name}: класифікація не вдалася, залишено DRAFT`
+            )
+          }
+        }
+      } catch (error) {
+        log.warning(`⚠️ ${site.name}: помилка класифікації: ${error.message}`)
       }
 
       log.info(`📦 ${site.name}: saved ${newEvents.length} events`)

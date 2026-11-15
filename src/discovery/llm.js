@@ -50,7 +50,7 @@ export function pruneHtml (html, max = MAX_HTML) {
   return value
 }
 
-function extractJson (text) {
+export function extractJson (text) {
   if (!text) return null
   const cleaned = String(text).replace(/```json|```/gi, '').trim()
   const start = cleaned.indexOf('{')
@@ -255,5 +255,43 @@ ${detailHtml}
   return {
     data: fieldsResult ? { fields: fieldsResult } : null,
     usage: result.usage
+  }
+}
+
+/**
+ * Класифікувати події: чи призначені вони для дітей. Один запит на весь батч.
+ * Повертає масив boolean тієї ж довжини або null при помилці.
+ */
+export async function classifyEventsForKids (events = []) {
+  if (!Array.isArray(events) || !events.length) return []
+  const items = events.map((e, i) => ({
+    i,
+    title: String(e?.title || '').slice(0, 200),
+    date: String(e?.date || '').slice(0, 40),
+    location: String(e?.location || '').slice(0, 120),
+    description: String(e?.description || '').slice(0, 300)
+  }))
+  const prompt = `Ти класифікуєш події: чи призначені вони для дітей (або для сімей з дітьми).
+Для кожної події поверни true, якщо подія для дітей, false — якщо для дорослих/загальна/18+.
+Події:
+${JSON.stringify(items)}
+Поверни ТІЛЬКИ валідний JSON:
+{"results":[true,false,...]} — масив boolean у тому ж порядку, що й події.`
+
+  try {
+    const response = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.1
+      }
+    })
+    const parsed = extractJson(response.response.text())
+    const results = parsed?.results
+    if (!Array.isArray(results) || results.length !== events.length) return null
+    return results.map((v) => Boolean(v))
+  } catch (error) {
+    console.warn('LLM classify failed:', error.message)
+    return null
   }
 }
