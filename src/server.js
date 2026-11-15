@@ -5,15 +5,16 @@ import fastifyWebsocket from '@fastify/websocket'
 import { scanSites } from './scanner/scanner.js'
 import siteConfigRoutes from './routes/sites-config.js'
 import eventRoutes from './routes/events.js'
-import aiFunctionsRoutes from './routes/aiFunctions.js'
 import { addLogClient, broadcastLog } from './utils.js'
 
 const fastify = Fastify({ logger: true })
 
 const defaultOrigins = [
+  'http://localhost:4173',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
+  'http://127.0.0.1:4173',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
   'http://127.0.0.1:5175'
@@ -32,7 +33,6 @@ await fastify.register(fastifyWebsocket)
 
 fastify.register(eventRoutes)
 fastify.register(siteConfigRoutes)
-fastify.register(aiFunctionsRoutes)
 
 fastify.get('/logs', { websocket: true }, (socket, req) => {
   addLogClient({ socket, req })
@@ -54,7 +54,6 @@ async function runScan (reply, request) {
   }
 }
 
-fastify.get('/scan', async (request, reply) => runScan(reply, request))
 fastify.post('/scan', async (request, reply) => runScan(reply, request))
 
 const port = Number(process.env.PORT) || 3000
