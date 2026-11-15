@@ -112,7 +112,7 @@ export default async function eventRoutes (fastify) {
     const body = request.body || {}
     const editableFields = [
       'title', 'date', 'time', 'location', 'description', 'image', 'url',
-      'status', 'siteConfigId'
+      'status', 'siteConfigId', 'category'
     ]
 
     const dataToUpdate = {}
@@ -122,7 +122,7 @@ export default async function eventRoutes (fastify) {
 
     for (const field of [
       'title', 'date', 'time', 'location', 'description', 'image', 'url',
-      'status'
+      'status', 'category'
     ]) {
       const value = dataToUpdate[field]
       if (value !== undefined && value !== null && typeof value !== 'string') {

@@ -115,20 +115,30 @@ function formatCandidates (candidates) {
 }
 
 async function callModel (prompt) {
-  try {
-    const response = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.1
+  const maxAttempts = 3
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1
+        }
+      })
+      const usage = response.response.usageMetadata || null
+      return { data: extractJson(response.response.text()), usage }
+    } catch (error) {
+      const message = error?.message || String(error)
+      const retryable = /503|429|Service Unavailable|high demand/i.test(message)
+      console.warn(`LLM attempt ${attempt}/${maxAttempts} failed: ${message}`)
+      if (!retryable || attempt === maxAttempts) {
+        return { data: null, usage: null }
       }
-    })
-    const usage = response.response.usageMetadata || null
-    return { data: extractJson(response.response.text()), usage }
-  } catch (error) {
-    console.warn('LLM discovery failed:', error.message)
-    return { data: null, usage: null }
+      const delay = /429/i.test(message) ? 13000 : 1000 * attempt
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
   }
+  return { data: null, usage: null }
 }
 
 const RECIPE_RULES = `
@@ -146,69 +156,7 @@ const RECIPE_FIELDS =
   '"item":"...","link":["..."],"fields":{"title":["..."],"date":["..."],"time":["..."],"image":["..."],"location":["..."],"description":["..."],"price":["..."]}'
 
 /**
- * Ask Gemini to choose the card selector and map fields from the candidates
- * collected by probeListing. Returns { data, usage }.
- */
-export async function proposeRecipe ({
-  url,
-  title,
-  candidates = [],
-  pagination = [],
-  structured = {}
-} = {}) {
-  const prompt = `Ти — експерт з веб-скрапінгу афіш подій.
-Сторінка: ${url}
-Заголовок: ${title || '—'}
-Структуровані дані: ${JSON.stringify(structured)}
-
-Нижче — кандидати карток подій та фрагменти їхнього HTML.
-
-${formatCandidates(candidates)}
-
-Кандидати пагінації:
-${JSON.stringify(pagination)}
-${RECIPE_RULES}
-Поверни ТІЛЬКИ валідний JSON:
-{${RECIPE_FIELDS},"pagination":{"mode":"url|loadMore|none","selector":"...","param":"page","text":"..."}}`
-
-  const result = await callModel(prompt)
-  return { data: normalizeRecipe(result.data), usage: result.usage }
-}
-
-/**
- * Ask Gemini to repair a recipe that produced poor extraction results.
- * Returns { data, usage }.
- */
-export async function repairRecipe ({
-  cardHtml = '',
-  sample = [],
-  failures = [],
-  current = {}
-} = {}) {
-  const prompt = `Ти — експерт з веб-скрапінгу афіш подій.
-Поточний рецепт не витягує частину полів. Виправ його.
-
-Поточний рецепт:
-${JSON.stringify(current)}
-
-Проблемні поля: ${failures.join(', ') || '—'}
-
-Що вже витягнуто з карток:
-${JSON.stringify(sample.slice(0, 3))}
-
-HTML картки:
-${cardHtml}
-${RECIPE_RULES}
-Поверни ТІЛЬКИ валідний JSON з виправленими полями:
-{${RECIPE_FIELDS}}`
-
-  const result = await callModel(prompt)
-  return { data: normalizeRecipe(result.data), usage: result.usage }
-}
-
-/**
- * Ask Gemini for field selectors on a detail page when generic extraction
- * did not fill all fields. Returns { data, usage } where data.fields exists.
+ * Ask Gemini for field selectors on a detail page. Returns { data, usage } where data.fields exists.
  */
 export async function refineDetail ({
   detailHtml = '',
@@ -220,8 +168,11 @@ export async function refineDetail ({
     ? missingFields
     : ['title', 'date', 'time', 'image', 'location', 'description']
 
-  const prompt = `Ти — експерт з веб-скрапінгу. Нижче HTML сторінки однієї події.
+  const prompt = `Ти — експерт з веб-скрапінгу. Нижче ПОВНИЙ HTML сторінки однієї події.
 Потрібно підібрати CSS-селектори для полів: ${fields.join(', ')}.
+ОБОВ'ЯЗКОВО поверни селектори для КОЖНОГО з перелічених полів (навіть якщо значення вже є — ми перевіримо їх). Не пропускай жодного поля.
+Використовуй ЛИШЕ реальні селектори, що існують у HTML. Суворо заборонено вигадувати. Для кожного поля повертай КАСКАД селекторів (масив) від найконкретнішого до найзагальнішого, наприклад: "title": [".event__title", "h1", "[itemprop='name']"]. Якщо селектора немає в HTML — не включай його, поверни null.
+Шукай за ЛОГІЧНИМ ЗМІСТОМ, а не лише за назвами класів: час може бути в елементі без класу "time", але з текстом у форматі HH:mm; дата — у форматі дати; місце — адреса/локація; опис — довший текст події. Підбирай селектори за вмістом елемента, а не за іменем класу.
 
 Опис події: для "description" поверни КІЛЬКА селекторів (до 5) на різні блоки,
 які РАЗОМ дають повний логічний опис: основний текст, деталі (місце, організатор),
@@ -256,6 +207,42 @@ ${detailHtml}
     data: fieldsResult ? { fields: fieldsResult } : null,
     usage: result.usage
   }
+}
+
+/**
+ * Запропонувати селектори списку подій (item, link, fields, pagination) за повним HTML.
+ */
+export async function proposeListRecipe ({ html = '', structured = {}, rejected = [] } = {}) {
+  const prompt = `Ти — експерт з веб-скрапінгу афіш подій.
+Нижче ПОВНИЙ HTML сторінки зі списком подій. Структуровані дані: ${JSON.stringify(structured)}.
+
+Підбери:
+- "item" — CSS-селектор картки однієї події (повторюваний елемент).
+- "link" — селектор посилання всередині картки.
+- "fields" — CSS-селектори відносно кореня картки для полів: title, date, time, image, location, description, price.
+- "pagination" — пагінація: {"mode":"url|loadMore|none", "selector":"...", "param":"page", "text":"..."}.
+
+Правила:
+- ВИБИРАЙ ТІЛЬКИ селектори, що реально присутні в наданому HTML. Суворо заборонено вигадувати класи/селектори.
+- Для кожного поля повертай КАСКАД селекторів (масив) від найконкретнішого до найзагальнішого, наприклад: "title": [".card__title", "h2", "[itemprop='name']"].
+- Якщо селектора немає в HTML — не включай його. Якщо жодного не знайшов — поверни null для цього поля.
+- Шукай за ЛОГІЧНИМ ЗМІСТОМ: час може бути без класу "time", але з текстом HH:mm; дата — у форматі дати; місце — адреса; опис — довший текст.
+- Для description поверни кілька селекторів (до 5).
+- Поверни ТІЛЬКИ валідний JSON.
+
+Селектори, які не знайшли жодного елемента (не повторюй їх):
+${JSON.stringify(rejected)}
+
+Повний HTML:
+${html}
+
+Поверни JSON:
+{"item":"...","link":["..."],"fields":{"title":["..."],"date":["..."],"time":["..."],"image":["..."],"location":["..."],"description":["..."],"price":["..."]},"pagination":{"mode":"url|loadMore|none","selector":"...","param":"page","text":"..."}}`
+
+  const result = await callModel(prompt)
+  const data = normalizeRecipe(result.data)
+  if (!data || !data.item) return { data: null, usage: result.usage }
+  return { data, usage: result.usage }
 }
 
 /**

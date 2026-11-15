@@ -138,7 +138,7 @@ async function saveEvent (site, event, stats, seenUrls) {
       }
     })
     seenUrls.add(event.url)
-    log.info(`✅ Saved: ${event.title || event.url}`)
+    broadcastLog(`✅ Saved: ${event.title || event.url}`)
     return true
   } catch (error) {
     if (error.code === 'P2002') {
@@ -268,7 +268,6 @@ export async function scanSites ({ siteId } = {}) {
             if (activeScanState.stopped) {
               throw new Error('SCAN_STOPPED')
             }
-            log.debug(`🧭 Visited ${request.url}`)
 
             // Let JS-heavy listings render before extracting.
             await page.waitForTimeout(2500)
