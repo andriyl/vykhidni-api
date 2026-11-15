@@ -1,13 +1,13 @@
 # vykhidni-api
 
-API для сканування афіш дитячих подій, авто-дискавері сайтів і AI-нормалізації.
+API для сканування афіш дитячих подій, авто-дискавері сайтів, геокодування подій та сканування.
 
 ## Вимоги
 
 - Node.js **20.19+ / 22.13+ / 24+** (рекомендовано 22 LTS, див. `.nvmrc`)
 - PostgreSQL
 - Gemini API key
-- Google Maps API key (для геокодування)
+- Nominatim (OpenStreetMap) — геокодування (безкоштовно, без API-ключа)
 
 ## Налаштування
 
@@ -16,8 +16,8 @@ API для сканування афіш дитячих подій, авто-д�
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vykhidni_db"
 GEMINI_API_KEY=...
-GOOGLE_MAPS_API_KEY=...
 # Необов'язково
+# GOOGLE_MAPS_API_KEY=...
 # PORT=3000
 # HOST=127.0.0.1
 # CORS_ORIGINS=http://localhost:5173,http://localhost:5174
@@ -26,8 +26,7 @@ GOOGLE_MAPS_API_KEY=...
 Ключі:
 
 - **GEMINI_API_KEY** — https://aistudio.google.com/u/2/api-keys
-- **GOOGLE_MAPS_API_KEY** — Google Cloud Console → увімкніть Geocoding API
-  (https://console.cloud.google.com/apis/library) → створіть ключ.
+- **GOOGLE_MAPS_API_KEY** (необов'язково) — резервний геокодер для нестандартних адрес: Nominatim → Google → `null`. https://console.cloud.google.com/google/maps-apis/credentials
 
 Встановлення та запуск:
 
