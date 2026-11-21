@@ -6,7 +6,7 @@ API для сканування афіш дитячих подій, авто-д�
 
 - Node.js **20.19+ / 22.13+ / 24+** (рекомендовано 22 LTS, див. `.nvmrc`)
 - PostgreSQL
-- Gemini API key
+- LLM Google Gemini із безкоштовним лімітом (fallback-ланцюжок: GEMINI_API_KEY → GEMINI_API_KEY_2 → ...).
 - Nominatim (OpenStreetMap) — геокодування (безкоштовно, без API-ключа)
 
 ## Налаштування
@@ -16,6 +16,13 @@ API для сканування афіш дитячих подій, авто-д�
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/vykhidni_db"
 GEMINI_API_KEY=...
+# Додаткові акаунти Gemini (fallback): GEMINI_API_KEY_2, GEMINI_API_KEY_3, ...
+# GEMINI_MODEL — модель для першого акаунта (за замовчуванням gemini-3.5-flash-lite).
+# GEMINI_MODEL_2 — модель для другого акаунта.
+# Необов'язково
+# GEMINI_MODEL=gemini-3.5-flash-lite
+# GEMINI_API_KEY_2=...
+# GEMINI_MODEL_2=gemini-3.5-flash-lite
 # Необов'язково
 # GOOGLE_MAPS_API_KEY=...
 # PORT=3000
@@ -26,6 +33,7 @@ GEMINI_API_KEY=...
 Ключі:
 
 - **GEMINI_API_KEY** — https://aistudio.google.com/u/2/api-keys
+- **GEMINI_API_KEY_2**, **GEMINI_API_KEY_3** … — додаткові акаунти Gemini з безкоштовними лімітами: https://aistudio.google.com/u/2/api-keys
 - **GOOGLE_MAPS_API_KEY** (необов'язково) — резервний геокодер для нестандартних адрес: Nominatim → Google → `null`. https://console.cloud.google.com/google/maps-apis/credentials
 
 Встановлення та запуск:
@@ -114,7 +122,7 @@ LLM-викликів: вибір картки й полів, виправлен�
 
 ### UI
 
-У адмінці: **Site configs → Додати сайт за URL** (`/site-configs/discover`).
+У адмінці: **Конфігурації сайтів → Автодискавері сайту** (`/site-configs/discover`).
 Майстер показує живий лог і кнопку активації.
 
 ### Формат нового рецепта

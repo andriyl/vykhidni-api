@@ -1,6 +1,6 @@
 import { PlaywrightCrawler, RequestQueue, log } from 'crawlee'
 import { prisma } from '../db/prisma.js'
-import { broadcastLog, getCoordinates, toUnix } from '../utils.js'
+import { broadcastLog, formatEventDate, getCoordinates, toUnix } from '../utils.js'
 import { clickLoadMore, USER_AGENT } from './browser.js'
 import { extractDetail, extractItems, getAction, normalizeActions } from './extract.js'
 import { classifyEventsForKids } from '../discovery/llm.js'
@@ -122,18 +122,22 @@ async function saveEvent (site, event, stats, seenUrls) {
     }
 
     const coords = await getCoordinates(event.location)
+    const unixTime = toUnix(event.date, event.time) || null
+    const dateStr = unixTime ? formatEventDate(unixTime) : String(event.date || '') || null
+    const clockTime = /(\d{1,2})[:.](\d{2})/.exec(String(event.date || ''))
+    const timeStr = event.time || (clockTime ? `${clockTime[1].padStart(2, '0')}:${clockTime[2]}` : null)
 
     await prisma.event.create({
       data: {
         title: event.title || event.url,
-        date: event.date || null,
-        time: event.time || null,
+        date: dateStr,
+        time: timeStr,
         location: event.location || null,
         description: event.description || null,
         image: event.image || null,
         url: event.url,
         siteConfigId: site.id,
-        unixTime: toUnix(event.date, event.time) || null,
+        unixTime,
         coordinates: coords ? `${coords.lat},${coords.lon}` : null
       }
     })

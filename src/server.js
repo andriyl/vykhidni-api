@@ -5,6 +5,7 @@ import fastifyWebsocket from '@fastify/websocket'
 import { scanSites } from './scanner/scanner.js'
 import siteConfigRoutes from './routes/sites-config.js'
 import eventRoutes from './routes/events.js'
+import providerRoutes from './routes/providers.js'
 import { addLogClient, broadcastLog } from './utils.js'
 
 const fastify = Fastify({ logger: true })
@@ -34,6 +35,7 @@ await fastify.register(fastifyWebsocket)
 
 fastify.register(eventRoutes)
 fastify.register(siteConfigRoutes)
+fastify.register(providerRoutes)
 
 fastify.get('/logs', { websocket: true }, (socket, req) => {
   addLogClient({ socket, req })

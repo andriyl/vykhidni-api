@@ -1,4 +1,4 @@
-import { model } from '../gemini.js'
+import { callLLM } from '../providers.js'
 
 const MAX_HTML = 1800
 
@@ -105,31 +105,23 @@ function normalizeRecipe (parsed) {
 async function callModel (prompt) {
   const maxAttempts = 3
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const response = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          temperature: 0.1
-        }
-      })
-      const usage = response.response.usageMetadata || null
-      return { data: extractJson(response.response.text()), usage }
-    } catch (error) {
-      const message = error?.message || String(error)
-      const retryable = /503|429|Service Unavailable|high demand/i.test(message)
-      console.warn(`LLM attempt ${attempt}/${maxAttempts} failed: ${message}`)
-      if (!retryable || attempt === maxAttempts) {
-        return { data: null, usage: null }
-      }
-      const delay = /429/i.test(message) ? 13000 : 1000 * attempt
-      await new Promise((resolve) => setTimeout(resolve, delay))
+    const result = await callLLM(prompt)
+    if (result.text) {
+      return { data: extractJson(result.text), usage: result.usage }
     }
+    const message = result.error || ''
+    const retryable = /503|429|Service Unavailable|high demand|quota|exhausted/i.test(message)
+    console.warn(`LLM attempt ${attempt}/${maxAttempts} failed: ${message}`)
+    if (!retryable || attempt === maxAttempts) {
+      return { data: null, usage: null }
+    }
+    const delay = /429/i.test(message) ? 13000 : 1000 * attempt
+    await new Promise((resolve) => setTimeout(resolve, delay))
   }
   return { data: null, usage: null }
 }
 /**
- * Ask Gemini for field selectors on a detail page. Returns { data, usage } where data.fields exists.
+ * Ask the LLM provider for field selectors on a detail page. Returns { data, usage } where data.fields exists.
  */
 export async function refineDetail ({
   detailHtml = '',
@@ -239,19 +231,14 @@ ${JSON.stringify(items)}
 {"results":[true,false,...]} — масив boolean у тому ж порядку, що й події.`
 
   try {
-    const response = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.1
-      }
-    })
-    const parsed = extractJson(response.response.text())
+    const result = await callLLM(prompt)
+    if (!result.text) return null
+    const parsed = extractJson(result.text)
     const results = parsed?.results
     if (!Array.isArray(results) || results.length !== events.length) return null
     return results.map((v) => Boolean(v))
   } catch (error) {
-    console.warn('LLM classify failed:', error.message)
+    console.warn('LLM classify failed:', error?.message)
     return null
   }
 }

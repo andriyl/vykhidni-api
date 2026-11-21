@@ -118,6 +118,22 @@ export function toUnix (dateStr, timeStr) {
   return Math.floor(ms / 1000)
 }
 
+const EVENT_TIME_ZONE = 'Europe/Kiev'
+
+// Уніфікована дата для зберігання/відображення: "14 січня 2026".
+export function formatEventDate (unixTime) {
+  if (unixTime == null) return ''
+  const date = new Date(Number(unixTime) * 1000)
+  if (Number.isNaN(date.getTime())) return ''
+  const text = new Intl.DateTimeFormat('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: EVENT_TIME_ZONE
+  }).format(date)
+  return String(text).replace(/\s*р\.?\s*$/u, '').trim()
+}
+
 export const MAX_DESCRIPTION = 500
 
 export function validateEvent (raw = {}) {
