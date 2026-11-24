@@ -18,15 +18,19 @@ import {
 
 const DETAIL_FIELDS = ['title', 'date', 'time', 'location', 'image', 'description']
 
+const SANE_CHECKS = {
+  date: text => /\d/.test(text),
+  time: text => /^([01]\d|2[0-3])[:.]\d{2}$/.test(text) || /T\d{2}:\d{2}/.test(text),
+  title: text => text.length >= 3 && text.length <= 300,
+  image: text => /^(https?:|data:|\/)/.test(text),
+  description: text => text.length >= 20
+}
+const defaultSaneCheck = text => text.length > 1
+
 function saneValue (field, value) {
   const text = (value || '').trim()
   if (!text) return false
-  if (field === 'date') return /\d/.test(text)
-  if (field === 'time') return /^([01]\d|2[0-3])[:.]\d{2}$/.test(text) || /T\d{2}:\d{2}/.test(text)
-  if (field === 'title') return text.length >= 3 && text.length <= 300
-  if (field === 'image') return /^(https?:|data:|\/)/.test(text)
-  if (field === 'description') return text.length >= 20
-  return text.length > 1
+  return (SANE_CHECKS[field] ?? defaultSaneCheck)(text)
 }
 
 export function normalizeStartUrl (value) {
