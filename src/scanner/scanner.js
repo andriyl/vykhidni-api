@@ -1,187 +1,424 @@
 import { PlaywrightCrawler, RequestQueue, log } from 'crawlee'
 import { prisma } from '../db/prisma.js'
-import { broadcastLog } from '../utils.js'
+import { broadcastLog, formatEventDate, getCoordinates, toUnix } from '../utils.js'
+import { clickLoadMore, USER_AGENT } from './browser.js'
+import { extractDetail, extractItems, getAction, normalizeActions } from './extract.js'
+import { classifyEventsForKids } from '../discovery/llm.js'
 
-const USER_AGENT =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126 Safari/537.36'
-
-// Адмінка зберігає extractDetails вкладеним ({ type, fields: {...} }),
-// старі конфіги в БД — плоскі. Підтримуємо обидва формати.
-function normalizeAction (action) {
-  if (!action || action.type !== 'extractDetails') return action
-  const { fields, ...rest } = action
-  return { ...rest, ...(fields || {}) }
+const activeScanState = {
+  running: false,
+  stopped: false,
+  reason: null,
+  siteId: null,
+  startedAt: null,
+  crawlers: [],
+  queues: []
 }
 
-function normalizeActions (actions) {
-  if (!Array.isArray(actions)) return []
-  return actions.map(normalizeAction)
+export function getScanState () {
+  return {
+    running: activeScanState.running,
+    stopped: activeScanState.stopped,
+    reason: activeScanState.reason,
+    siteId: activeScanState.siteId,
+    startedAt: activeScanState.startedAt
+  }
 }
 
-function getAction (actions, type) {
-  return actions.find((a) => a.type === type)
+export async function stopScan (reason = 'manual') {
+  if (!activeScanState.running) {
+    return { stopped: false, message: 'Сканування не запущено' }
+  }
+  activeScanState.stopped = true
+  activeScanState.reason = reason
+  broadcastLog('⛔ Зупинка сканування за запитом з адмінки...')
+
+  for (const crawler of activeScanState.crawlers) {
+    try {
+      if (typeof crawler.stop === 'function') {
+        await crawler.stop()
+      }
+    } catch {}
+  }
+  for (const queue of activeScanState.queues) {
+    try {
+      if (typeof queue.drop === 'function') {
+        await queue.drop()
+      }
+    } catch {}
+  }
+  return { stopped: true }
 }
 
 const DEFAULT_MAX_PAGES = 5
+const DEFAULT_HYDRATE_LIMIT = 100
 
-function pageNumber (url) {
-  const match = url.match(/[?&]page=(\d+)/)
+function pageNumber (url, param = 'page') {
+  const escaped = param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = url.match(new RegExp(`[?&]${escaped}=(\\d+)`))
   return match ? Number(match[1]) : 0
 }
 
-async function textOf (page, selector) {
-  if (!selector) return ''
-  try {
-    const value = await page.locator(selector).first().textContent({ timeout: 5000 })
-    return value?.trim() || ''
-  } catch {
-    return ''
-  }
-}
+async function hydrateEvent (page, event, detailAction) {
+  if (!detailAction || !event.url) return true
 
-async function imageOf (page, selector) {
-  if (!selector) return ''
+  const detailPage = await page.context().newPage()
   try {
-    const locator = page.locator(selector).first()
-    await locator.waitFor({ state: 'attached', timeout: 5000 })
-    for (const attr of ['src', 'data-src', 'data-bg']) {
-      const value = await locator.getAttribute(attr)
-      if (value) return value.trim()
+    await detailPage.goto(event.url, {
+      waitUntil: 'domcontentloaded',
+      timeout: 30000
+    })
+    await detailPage.waitForTimeout(1500)
+    const detail = await extractDetail(detailPage, detailAction)
+
+    for (const key of ['title', 'date', 'time', 'location', 'description', 'image']) {
+      if (!event[key] && detail[key]) event[key] = detail[key]
+      if (
+        (key === 'description' || key === 'location') &&
+        detail[key] &&
+        detail[key].length > (event[key] || '').length
+      ) {
+        event[key] = detail[key]
+      }
     }
-    return ''
-  } catch {
-    return ''
+    return true
+  } catch (error) {
+    log.warning(`Detail hydration failed for ${event.url}: ${error.message}`)
+    return false
+  } finally {
+    await detailPage.close().catch(() => {})
   }
 }
 
-async function extractEvent (page, config) {
-  return {
-    title: await textOf(page, config.title),
-    date: await textOf(page, config.date),
-    time: await textOf(page, config.time),
-    location: await textOf(page, config.location),
-    description: await textOf(page, config.description),
-    image: await imageOf(page, config.image),
-    url: page.url()
+async function saveEvent (site, event, stats, seenUrls) {
+  if (!event?.url) return false
+  if (seenUrls.has(event.url)) {
+    stats.skipped += 1
+    return false
+  }
+
+  // Не перезаписуємо та не доповнюємо івенти, що вже затверджені
+  const existing = await prisma.event
+    .findUnique({
+      where: { url: event.url },
+      select: { id: true, status: true }
+    })
+    .catch(() => null)
+  if (
+    existing &&
+    existing.status === 'APPROVED'
+  ) {
+    seenUrls.add(event.url)
+    stats.skipped += 1
+    return false
+  }
+
+  try {
+    if (existing) {
+      // Якщо івент вже існує, але не затверджений - не оновлюємо, лише рахуємо
+      seenUrls.add(event.url)
+      stats.skipped += 1
+      return false
+    }
+
+    const coords = await getCoordinates(event.location)
+    const unixTime = toUnix(event.date, event.time) || null
+    const dateStr = unixTime ? formatEventDate(unixTime) : String(event.date || '') || null
+    const clockTime = /(\d{1,2})[:.](\d{2})/.exec(String(event.date || ''))
+    const timeStr = event.time || (clockTime ? `${clockTime[1].padStart(2, '0')}:${clockTime[2]}` : null)
+
+    await prisma.event.create({
+      data: {
+        title: event.title || event.url,
+        date: dateStr,
+        time: timeStr,
+        location: event.location || null,
+        description: event.description || null,
+        image: event.image || null,
+        url: event.url,
+        siteConfigId: site.id,
+        unixTime,
+        coordinates: coords ? `${coords.lat},${coords.lon}` : null
+      }
+    })
+    seenUrls.add(event.url)
+    broadcastLog(`✅ Saved: ${event.title || event.url}`)
+    return true
+  } catch (error) {
+    if (error.code === 'P2002') {
+      seenUrls.add(event.url)
+      stats.skipped += 1
+      log.warning(`⚠️ Already exists: ${event.url}`)
+    } else {
+      log.error(`❌ Error saving event: ${error.message}`)
+    }
+    return false
   }
 }
 
+/**
+ * Сканер сайтів за конфігами SiteConfig.
+ * Підтримує лише поточний формат:
+ * extractListItems + paginate (url/loadMore) + seedUrls + extractDetails.
+ */
 export async function scanSites ({ siteId } = {}) {
-  const sites = await prisma.siteConfig.findMany({
-    where: siteId ? { id: Number(siteId) } : undefined
-  })
+  if (activeScanState.running) {
+    throw new Error('Сканування вже запущено')
+  }
+
+  let numericSiteId = null
+  if (siteId !== undefined && siteId !== null && siteId !== '') {
+    numericSiteId = Number(siteId)
+    if (!Number.isInteger(numericSiteId) || numericSiteId <= 0) {
+      throw new Error('Некоректний siteId')
+    }
+  }
+
+  activeScanState.running = true
+  activeScanState.stopped = false
+  activeScanState.reason = null
+  activeScanState.siteId = numericSiteId
+  activeScanState.startedAt = new Date().toISOString()
+  activeScanState.crawlers = []
+  activeScanState.queues = []
+
   let totalEvents = 0
 
-  for (const site of sites) {
-    if (!site.isActive) {
-      log.info(`⏸️ Skipping inactive site: ${site.name}`)
-      broadcastLog(`⏸️ Пропускаємо неактивний сайт: ${site.name}`)
-      continue
-    }
+  try {
+    const sites = await prisma.siteConfig.findMany({
+      where: numericSiteId
+        ? { id: numericSiteId, deletedAt: null }
+        : { deletedAt: null }
+    })
 
-    const actions = normalizeActions(site.actions)
-    const paginationAction = getAction(actions, 'paginate')
-    const extractListAction = getAction(actions, 'extractList')
-    const extractDetailsConfig = getAction(actions, 'extractDetails')
+    for (const site of sites) {
+      if (activeScanState.stopped) {
+        broadcastLog('⛔ Сканування зупинено')
+        break
+      }
+      if (site.status !== 'ACTIVE') {
+        log.info(`⏸️ Skipping inactive site: ${site.name}`)
+        broadcastLog(`⏸️ Пропускаємо неактивний сайт: ${site.name}`)
+        continue
+      }
 
-    log.info(`🔍 Scanning site: ${site.name} (${site.startUrl})`)
-    broadcastLog(`🔍 Скануємо сайт: ${site.name}`)
+      const actions = normalizeActions(site.actions)
+      const paginationAction = getAction(actions, 'paginate')
+      const listItemsAction = getAction(actions, 'extractListItems')
+      const extractDetailsAction = getAction(actions, 'extractDetails')
+      const seedUrlsAction = getAction(actions, 'seedUrls')
 
-    const scannedUrls = await prisma.event
-      .findMany({
-        where: { siteConfigId: site.id },
-        select: { url: true }
-      })
-      .then((events) => events.map((e) => e.url))
+      if (!listItemsAction) {
+        log.warning(`⏭️ Skipping site without extractListItems: ${site.name}`)
+        broadcastLog(
+          `⏭️ Пропускаємо сайт без extractListItems: ${site.name}`
+        )
+        continue
+      }
 
-    const newEvents = []
+      log.info(`🔍 Scanning site: ${site.name} (${site.startUrl})`)
+      broadcastLog(`🔍 Скануємо сайт: ${site.name}`)
 
-    // Окрема черга на кожен сайт. Скидаємо її, щоб необроблені запити
-    // з обірваного попереднього скану не потрапили в новий запуск.
-    const queueName = `site-${site.id}`
-    await (await RequestQueue.open(queueName)).drop().catch(() => {})
-    const requestQueue = await RequestQueue.open(queueName)
+      const stats = { skipped: 0 }
 
-    try {
-      const crawler = new PlaywrightCrawler({
-        requestQueue,
-        maxConcurrency: 3,
-        maxRequestRetries: 1,
-        navigationTimeoutSecs: 30,
-        requestHandlerTimeoutSecs: 60,
-        launchContext: {
-          userAgent: USER_AGENT
-        },
-        async requestHandler ({ page, request, enqueueLinks }) {
-          log.debug(`🧭 Visited [${request.label || 'LIST'}] ${request.url}`)
+      const existingUrls = await prisma.event
+        .findMany({
+          where: { siteConfigId: site.id },
+          select: { url: true }
+        })
+        .then((events) => events.map((event) => event.url))
+      const seenUrls = new Set(existingUrls)
+      const newEvents = []
 
-          if (paginationAction && request.label !== 'DETAIL') {
-            try {
-              const maxPages =
-                Number(paginationAction.maxPages) || DEFAULT_MAX_PAGES
+      let hydrateBudget = DEFAULT_HYDRATE_LIMIT
+      let hydrateFailures = 0
 
-              await enqueueLinks({
-                selector: paginationAction.selector,
-                transformRequestFunction: (req) => {
-                  if (scannedUrls.includes(req.url)) return null
-                  if (!req.url.includes('page=')) return null
-                  if (pageNumber(req.url) >= maxPages) return null
-                  return req
-                },
-                label: 'PAGINATION'
-              })
-            } catch (err) {
-              log.warning(`Pagination failed on ${request.url}: ${err.message}`)
-            }
+      const queueName = `site-${site.id}-${Date.now()}`
+      const requestQueue = await RequestQueue.open(queueName)
+
+      const saveFromList = async (page) => {
+        const events = await extractItems(page, listItemsAction)
+
+        for (const event of events) {
+          if (seenUrls.has(event.url)) {
+            stats.skipped += 1
+            continue
           }
-
-          if (extractListAction && request.label !== 'DETAIL') {
-            try {
-              const links = await page.$$eval(extractListAction.selector, (els) =>
-                els.map((el) => el.getAttribute('href') || el.href).filter(Boolean)
-              )
-
-              log.info(`🔗 Found ${links.length} links on list page`)
-
-              for (const url of links) {
-                if (!scannedUrls.includes(url)) {
-                  await enqueueLinks({ urls: [url], label: 'DETAIL' })
-                }
-              }
-            } catch (err) {
-              log.warning(`List extraction failed on ${request.url}: ${err.message}`)
-            }
+          // Stop hydrating after repeated failures: a slow site otherwise eats
+          // the request handler timeout and its pagination pages never load.
+          if (hydrateBudget > 0 && hydrateFailures < 3) {
+            const hydrated = await hydrateEvent(page, event, extractDetailsAction)
+            hydrateBudget -= 1
+            if (!hydrated) hydrateFailures += 1
           }
-
-          if (extractDetailsConfig && request.label === 'DETAIL') {
-            const event = await extractEvent(page, extractDetailsConfig)
-            log.debug(`📄 Extracted event: ${event.title}`)
-
-            try {
-              await prisma.event.create({
-                data: { ...event, siteConfigId: site.id }
-              })
-              newEvents.push(event)
-              log.info(`✅ Saved: ${event.title}`)
-            } catch (err) {
-              if (err.code === 'P2002') {
-                log.warning(`⚠️ Already exists: ${event.url}`)
-              } else {
-                log.error(`❌ Error saving event: ${err.message}`)
-              }
-            }
+          if (await saveEvent(site, event, stats, seenUrls)) {
+            newEvents.push(event)
           }
         }
-      })
+      }
 
-      await crawler.run([site.startUrl])
-    } finally {
-      await requestQueue.drop().catch(() => {})
+      try {
+        if (activeScanState.stopped) break
+        const crawler = new PlaywrightCrawler({
+          requestQueue,
+          maxConcurrency: 3,
+          maxRequestRetries: 1,
+          navigationTimeoutSecs: 30,
+          requestHandlerTimeoutSecs: 120,
+          launchContext: {
+            userAgent: USER_AGENT
+          },
+          async requestHandler ({ page, request, enqueueLinks }) {
+            if (activeScanState.stopped) {
+              throw new Error('SCAN_STOPPED')
+            }
+
+            // Let JS-heavy listings render before extracting.
+            await page.waitForTimeout(2500)
+
+            if (paginationAction?.mode === 'loadMore') {
+              const clicks = await clickLoadMore(
+                page,
+                paginationAction,
+                Number(paginationAction.maxPages) || 10
+              )
+              if (clicks) {
+                log.info(`➕ Loaded more: ${clicks} click(s)`)
+              }
+            } else if (paginationAction) {
+              try {
+                const maxPages =
+                  Number(paginationAction.maxPages) || DEFAULT_MAX_PAGES
+                const param = paginationAction.param || 'page'
+
+                if (paginationAction.selector) {
+                  const depth = Number(request.userData?.pageDepth || 0)
+                  await enqueueLinks({
+                    selector: paginationAction.selector,
+                    transformRequestFunction: (req) => {
+                      if (seenUrls.has(req.url)) return null
+                      if (depth + 1 > maxPages) return null
+                      if (pageNumber(req.url, param) > maxPages) return null
+                      req.userData = {
+                        ...(req.userData || {}),
+                        pageDepth: depth + 1
+                      }
+                      return req
+                    },
+                    label: 'PAGINATION'
+                  })
+                } else {
+                  const escaped = param.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                  const links = await page.$$eval(
+                    'a[href]',
+                    (elements, pattern) => {
+                      const re = new RegExp(pattern)
+                      return elements
+                        .map((el) => el.href)
+                        .filter((href) => re.test(href))
+                    },
+                    `[?&]${escaped}=\\d+`
+                  )
+                  const depth = Number(request.userData?.pageDepth || 0)
+                  if (depth + 1 <= maxPages) {
+                    for (const link of links) {
+                      if (pageNumber(link, param) > maxPages) continue
+                      await enqueueLinks({ urls: [link], label: 'PAGINATION' })
+                    }
+                  }
+                }
+              } catch (error) {
+                log.warning(
+                  `Pagination failed on ${request.url}: ${error.message}`
+                )
+              }
+            }
+
+            await saveFromList(page)
+          }
+        })
+
+        const urls = [site.startUrl]
+        if (Array.isArray(seedUrlsAction?.urls)) {
+          for (const seed of seedUrlsAction.urls) {
+            try {
+              urls.push(new URL(seed, site.startUrl).toString())
+            } catch {}
+          }
+        }
+
+        activeScanState.crawlers.push(crawler)
+        activeScanState.queues.push(requestQueue)
+        try {
+          await crawler.run([...new Set(urls)])
+        } catch (error) {
+          if (
+            error?.message === 'SCAN_STOPPED' ||
+            activeScanState.stopped
+          ) {
+            log.info('Сканування зупинено')
+          } else {
+            throw error
+          }
+        }
+      } finally {
+        await requestQueue.drop().catch(() => {})
+      }
+
+      // Класифікація: чи події для дітей (один запит на весь батч)
+      try {
+        const toClassify = await prisma.event.findMany({
+          where: { siteConfigId: site.id, status: 'DRAFT', aiProcessed: false },
+          select: { url: true, title: true, date: true, location: true, description: true }
+        })
+        if (toClassify.length) {
+          const results = await classifyEventsForKids(toClassify)
+          if (Array.isArray(results) && results.length === toClassify.length) {
+            let rejected = 0
+            for (let i = 0; i < toClassify.length; i += 1) {
+              const isKid = results[i]
+              await prisma.event.updateMany({
+                where: { url: toClassify[i].url },
+                data: {
+                  isForKids: isKid,
+                  aiProcessed: true,
+                  ...(isKid ? {} : { status: 'REJECTED' })
+                }
+              })
+              if (!isKid) rejected += 1
+            }
+            if (rejected) {
+              log.info(`🚫 ${site.name}: відхилено ${rejected} не-дитячих подій`)
+              broadcastLog(
+                `🚫 ${site.name}: відхилено ${rejected} не-дитячих подій`
+              )
+            }
+          } else {
+            log.warning(
+              `⚠️ ${site.name}: класифікація не вдалася, залишено DRAFT`
+            )
+          }
+        }
+      } catch (error) {
+        log.warning(`⚠️ ${site.name}: помилка класифікації: ${error.message}`)
+      }
+
+      log.info(`📦 ${site.name}: saved ${newEvents.length} events`)
+      broadcastLog(
+        `📦 ${site.name}: нових подій ${newEvents.length}` +
+          (stats.skipped ? `, пропущено ${stats.skipped}` : '')
+      )
+      totalEvents += newEvents.length
     }
+  } finally {
+    activeScanState.running = false
+    activeScanState.crawlers = []
+    activeScanState.queues = []
+  }
 
-    log.info(`📦 ${site.name}: saved ${newEvents.length} events`)
-    broadcastLog(`📦 ${site.name}: нових подій ${newEvents.length}`)
-    totalEvents += newEvents.length
+  if (activeScanState.stopped) {
+    broadcastLog('⛔ Сканування зупинено користувачем')
+    return totalEvents
   }
 
   log.info(`🎉 Done! Total new events: ${totalEvents}`)
